@@ -31,6 +31,8 @@ import (
   "google.golang.org/grpc/reflection"
   "google.golang.org/grpc/status"
   "google.golang.org/grpc/codes"
+  health "google.golang.org/grpc/health"
+  healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
   {{- range $index, $goImportPath := .GoImportPath }}
   {{ PackageName $goImportPath }} "{{ $goImportPath }}"
@@ -67,6 +69,7 @@ func main() {
   fmt.Printf("server listening at %v\n", lis.Addr())
 
   server := grpc.NewServer()
+  healthpb.RegisterHealthServer(server, health.NewServer())
   {{- range $index, $service := .Services }}
   {{ $service.PackageName }}.Register{{$service.GoName}}Server(server, New{{ $service.PackageName }}{{ $service.GoName }}())
   {{- end }}
