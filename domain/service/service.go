@@ -99,6 +99,9 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 }
 
 func (ss *serviceServiceImpl) NewClient(ctx context.Context, serviceName string) (*grpc.ClientConn, error) {
+	if ss.hostResolver == nil {
+		return nil, errors.New("Unsupported")
+	}
 	target, err := ss.hostResolver.Resolve(ctx, serviceName)
 	if err != nil {
 		return nil, errors.WithStack(err)

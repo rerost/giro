@@ -43,7 +43,7 @@ func ProvideRPCAddr(cfg Config) RPCAddr {
 
 func ProviderHostResolver(rpcAddr RPCAddr) (host.HostResolver, error) {
 	if rpcAddr == "" {
-		return nil, errors.New("Unsupported")
+		return nil, nil
 	}
 
 	return host.NewConstHostResolver(string(rpcAddr)), nil
