@@ -38,6 +38,7 @@ jobs:
   test:
     needs: install
     name: Test
+    runs-on: ubuntu-latest
     steps:
     - name: test
       run: go test -v .
