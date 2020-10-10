@@ -39,4 +39,5 @@ jobs:
     needs: install
     name: Test
     - name: Test
+      steps:
       run: go test -v .
