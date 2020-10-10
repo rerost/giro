@@ -3,6 +3,7 @@ module github.com/rerost/giro
 go 1.14
 
 require (
+	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.4.1
 	github.com/google/wire v0.4.0
 	github.com/jhump/protoreflect v1.7.0
