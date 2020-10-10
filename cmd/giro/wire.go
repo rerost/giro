@@ -15,6 +15,7 @@ import (
 	"github.com/rerost/giro/domain/messagename"
 	"github.com/rerost/giro/domain/service"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 )
@@ -183,7 +184,25 @@ func ProviderToBinaryCmd(messageeService message.MessageService) ToBinaryCmd {
 
 type CallCmd *cobra.Command
 
+func ParseMetadata(m string) (map[string]string, error) {
+	if m == "" {
+		return nil, nil
+	}
+	ms := strings.Split(m, ":")
+	if len(ms)%2 != 0 {
+		return nil, errors.New("Expect key1:val1:key2:val2 format")
+	}
+	md := make(map[string]string, len(ms)/2)
+
+	for i := 0; i < len(ms); i += 2 {
+		md[ms[i]] = ms[i+1]
+	}
+	return md, nil
+}
+
 func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
+	var metaData string
+
 	cmd := &cobra.Command{
 		Use:  "call",
 		Args: cobra.RangeArgs(1, 2),
@@ -201,17 +220,27 @@ func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
 				body = string(b)
 			}
 
-			tmp := strings.Split(args[0], "/")
-			svcName := tmp[0]
-			methodName := tmp[1]
-			bin, err := serviceService.Call(ctx, svcName, methodName, nil, message.JSON(body))
+			parsedMeataData, err := ParseMetadata(metaData)
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Println(bin)
+			for k, v := range parsedMeataData {
+				zap.L().Debug("received metadata", zap.String(k, v))
+			}
+
+			tmp := strings.Split(args[0], "/")
+			svcName := tmp[0]
+			methodName := tmp[1]
+			bin, err := serviceService.Call(ctx, svcName, methodName, parsedMeataData, message.JSON(body))
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			fmt.Println(string(bin))
 			return nil
 		},
 	}
+
+	cmd.Flags().StringVarP(&metaData, "", "m", "", "metadata. e.g key1:val1:key2:val2")
 
 	return cmd
 }

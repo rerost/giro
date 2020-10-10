@@ -10,6 +10,7 @@ import (
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type ServiceService interface {
@@ -39,7 +40,7 @@ func NewServiceService(grpcreflectClient *grpcreflect.Client, hostResolver host.
 	}
 }
 
-func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, methodName string, metadata map[string]string, body message.JSON) (message.JSON, error) {
+func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, methodName string, md map[string]string, body message.JSON) (message.JSON, error) {
 	grpcClient, err := ss.NewClient(ctx, serviceName)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -62,7 +63,8 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 
 	responseDynamicMessage, err := ss.messageService.ToDynamicMessage(ctx, responseMessageName, message.JSON("{}"))
 
-	err = grpcClient.Invoke(ctx, ss.fullMethodName(serviceName, methodName), requestDynamicMessage, responseDynamicMessage)
+	m := metadata.New(md)
+	err = grpcClient.Invoke(ctx, ss.fullMethodName(serviceName, methodName), requestDynamicMessage, responseDynamicMessage, grpc.Header(&m))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
