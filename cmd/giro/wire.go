@@ -68,21 +68,26 @@ func ProviderLsCmd(serviceService service.ServiceService) LsCmd {
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
 
-			var srvs []service.Service
-			var err error
 			switch len(args) {
 			case 0:
-				srvs, err = serviceService.Ls(ctx, nil, nil)
+				srvs, err := serviceService.Ls(ctx, nil, nil)
+				if err != nil {
+					return errors.WithStack(err)
+				}
+				for _, s := range srvs {
+					fmt.Println(s.Name)
+				}
 			case 1:
-				srvs, err = serviceService.Ls(ctx, &args[0], nil)
+				srvs, err := serviceService.Ls(ctx, &args[0], nil)
+				if err != nil {
+					return errors.WithStack(err)
+				}
+				for _, mn := range srvs[0].MethodNames {
+					fmt.Println(mn)
+				}
 			case 2:
-				srvs, err = serviceService.Ls(ctx, &args[0], &args[1])
+				return errors.New("Unsupported")
 			}
-			if err != nil {
-				return errors.WithStack(err)
-			}
-
-			fmt.Println(srvs) // TODO Fix
 
 			return nil
 		},
