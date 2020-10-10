@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
+	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
@@ -25,13 +25,13 @@ type Service struct {
 
 type serviceServiceImpl struct {
 	hostResolver        host.HostResolver
-	grpcreflectClient   *grpcreflect.Client
+	grpcreflectClient   grpcreflectiface.Client
 	messageService      message.MessageService
 	messageNameResolver messagename.MessageNameResolver
 	grpcClientOpts      []grpc.DialOption
 }
 
-func NewServiceService(grpcreflectClient *grpcreflect.Client, hostResolver host.HostResolver, messageNameResolver messagename.MessageNameResolver, messageService message.MessageService) ServiceService {
+func NewServiceService(grpcreflectClient grpcreflectiface.Client, hostResolver host.HostResolver, messageNameResolver messagename.MessageNameResolver, messageService message.MessageService) ServiceService {
 	return &serviceServiceImpl{
 		hostResolver:        hostResolver,
 		messageNameResolver: messageNameResolver,
