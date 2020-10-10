@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/jhump/protoreflect/desc"
-	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
+	"github.com/rerost/giro/domain/grpcreflectiface"
 )
 
 type MessageName string
@@ -16,10 +16,10 @@ type MessageNameResolver interface {
 }
 
 type messageNameResolverImpl struct {
-	client *grpcreflect.Client
+	client grpcreflectiface.Client
 }
 
-func NewMessageNameResolver(client *grpcreflect.Client) MessageNameResolver {
+func NewMessageNameResolver(client grpcreflectiface.Client) MessageNameResolver {
 	return &messageNameResolverImpl{
 		client: client,
 	}
