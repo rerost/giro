@@ -38,6 +38,6 @@ jobs:
   test:
     needs: install
     name: Test
-    - name: Test
-      steps:
+    steps:
+    - name: test
       run: go test -v .
