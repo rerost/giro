@@ -5,8 +5,8 @@ import (
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/jhump/protoreflect/dynamic"
-	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
+	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/messagename"
 )
 
@@ -23,11 +23,11 @@ type MessageService interface {
 }
 
 type messageServiceImpl struct {
-	grpcreflectClient *grpcreflect.Client
+	grpcreflectClient grpcreflectiface.Client
 	jsonMarshaler     *jsonpb.Marshaler
 }
 
-func NewMessageService(client *grpcreflect.Client) MessageService {
+func NewMessageService(client grpcreflectiface.Client) MessageService {
 	return &messageServiceImpl{
 		grpcreflectClient: client,
 		jsonMarshaler: &jsonpb.Marshaler{
