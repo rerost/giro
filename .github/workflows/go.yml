@@ -7,8 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-    name: Build
+  install:
+    name: Install
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x
@@ -21,16 +21,22 @@ jobs:
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
+  build_giro:
+    needs: install
+    name: Build Giro
+    runs-on: ubuntu-latest
+    steps:
     - name: Build giro
       run: go build ./cmd/giro
+  build_protoc_gen_reflection_server:
+    needs: install
+    name: Build Giro
+    runs-on: ubuntu-latest
+    steps:
     - name: Build protoc-gen-reflection-server      
       run: go build ./cmd/protoc-gen-reflection-server
   test:
-    name: test
-    runs-on: ubuntu-latest
-    steps:
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
+    needs: install
+    name: Test
     - name: Test
       run: go test -v .
