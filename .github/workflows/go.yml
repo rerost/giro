@@ -30,10 +30,10 @@ jobs:
       run: go build ./cmd/giro
   build_protoc_gen_reflection_server:
     needs: install
-    name: Build Giro
+    name: Build protoc-gen-reflection-server
     runs-on: ubuntu-latest
     steps:
-    - name: Build protoc-gen-reflection-server      
+    - name: Build protoc-gen-reflection-server
       run: go build ./cmd/protoc-gen-reflection-server
   test:
     needs: install
