@@ -73,7 +73,10 @@ func ProviderLsCmd(serviceService service.ServiceService) LsCmd {
 		RunE: func(ccmd *cobra.Command, arg []string) error {
 			ctx := ccmd.Context()
 
-			args := strings.Split(arg[0], "/")
+			var args []string
+			if len(arg) == 1 {
+				args = strings.Split(arg[0], "/")
+			}
 
 			switch len(args) {
 			case 0:
