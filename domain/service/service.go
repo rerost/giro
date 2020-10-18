@@ -95,6 +95,22 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 		}
 
 		return []Service{svc}, nil
+	} else if serviceName != nil && methodName != nil {
+		svc := Service{Name: *serviceName}
+		sd, err := ss.grpcreflectClient.ResolveService(*serviceName)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		for _, md := range sd.GetMethods() {
+			if *methodName == md.GetName() {
+				svc.MethodNames = append(svc.MethodNames, md.GetName())
+
+				return []Service{svc}, nil
+			}
+		}
+
+		return nil, errors.New("Method not found")
 	}
 
 	return nil, errors.New("Unsupported")
