@@ -12,6 +12,7 @@ import (
 	"github.com/google/wire"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
+	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
@@ -60,6 +61,7 @@ var base = wire.NewSet(
 	ProviderHostResolver,
 	ProvideReflectionAddr,
 	ProvideRPCAddr,
+	grpcreflectiface.NewClient,
 )
 
 type LsCmd *cobra.Command
@@ -112,7 +114,7 @@ func ProviderEmptyJSONCmd(messageeService message.MessageService) EmptyJSONCmd {
 				return errors.WithStack(err)
 			}
 
-			fmt.Println(json)
+			fmt.Println(string(json))
 
 			return nil
 		},

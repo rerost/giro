@@ -11,6 +11,7 @@ import (
 	"github.com/google/wire"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
+	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
@@ -32,14 +33,15 @@ func NewCmdRoot(ctx context.Context, cfg Config) (*cobra.Command, error) {
 	if err != nil {
 		return nil, err
 	}
+	grpcreflectifaceClient := grpcreflectiface.NewClient(client)
 	rpcAddr := ProvideRPCAddr(cfg)
 	hostResolver, err := ProviderHostResolver(rpcAddr)
 	if err != nil {
 		return nil, err
 	}
-	messageNameResolver := messagename.NewMessageNameResolver(client)
-	messageService := message.NewMessageService(client)
-	serviceService := service.NewServiceService(client, hostResolver, messageNameResolver, messageService)
+	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
+	messageService := message.NewMessageService(grpcreflectifaceClient)
+	serviceService := service.NewServiceService(grpcreflectifaceClient, hostResolver, messageNameResolver, messageService)
 	lsCmd := ProviderLsCmd(serviceService)
 	emptyJSONCmd := ProviderEmptyJSONCmd(messageService)
 	toJSONCmd := ProviderToJSONCmd(messageService)
@@ -88,7 +90,7 @@ func ProviderHostResolver(rpcAddr RPCAddr) (host.HostResolver, error) {
 var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient,
 	ProviderHostResolver,
 	ProvideReflectionAddr,
-	ProvideRPCAddr,
+	ProvideRPCAddr, grpcreflectiface.NewClient,
 )
 
 type LsCmd *cobra.Command
@@ -140,7 +142,7 @@ func ProviderEmptyJSONCmd(messageeService message.MessageService) EmptyJSONCmd {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Println(json)
+			fmt.Println(string(json))
 
 			return nil
 		},
