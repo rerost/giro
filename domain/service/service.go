@@ -113,7 +113,7 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 		return nil, errors.New("Method not found")
 	}
 
-	return nil, errors.New("Unsupported")
+	panic("Unexpected")
 }
 
 func (ss *serviceServiceImpl) NewClient(ctx context.Context, serviceName string) (*grpc.ClientConn, error) {
