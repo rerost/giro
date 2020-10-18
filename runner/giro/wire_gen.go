@@ -185,7 +185,7 @@ func ProviderToJSONCmd(messageeService message.MessageService) ToJSONCmd {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Println(json)
+			fmt.Println(string(json))
 
 			return nil
 		},
@@ -216,7 +216,7 @@ func ProviderToBinaryCmd(messageeService message.MessageService) ToBinaryCmd {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Println(bin)
+			fmt.Println(string(bin))
 
 			return nil
 		},

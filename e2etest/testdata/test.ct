@@ -1,0 +1,12 @@
+# Command should fail, but doesn't.
+# Fatal error, so must be in its own file.
+
+$ giro ls
+grpc.reflection.v1alpha.ServerReflection
+rerost.giro.v1.TestService
+
+$ giro call rerost.giro.v1.TestService/Echo {"message":"Test"}
+{"message":"Test"}
+
+$ giro empty_json rerost.giro.v1.EchoRequest
+{"message":""}

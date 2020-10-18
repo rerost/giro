@@ -1,7 +1,7 @@
 syntax = "proto3";
 package rerost.giro.v1;
 
-option go_package = "github.com/rerost/giro/e2etest/dummyserver;echo_pb";
+option go_package = "github.com/rerost/giro/e2etest/dummyserver;dummyserver";
 
 message EchoRequest {
   string message = 1;
