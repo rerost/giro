@@ -25,7 +25,7 @@ func GiroCmd() int {
 	cmd, err := giro.NewCmdRoot(ctx, giro.Config{
 		ReflectionServer: fmt.Sprintf("localhost:%s", port),
 		RpcServer:        fmt.Sprintf("localhost:%s", port),
-	})
+	}, "", "")
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

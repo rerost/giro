@@ -19,7 +19,7 @@ type Config struct {
 	Verbose          bool
 }
 
-func Run() error {
+func Run(version Version, revision Revision) error {
 	ctx := context.Background()
 	cfg, err := NewConfig()
 	if err != nil {
@@ -36,7 +36,7 @@ func Run() error {
 	cfgJSON, _ := json.Marshal(cfg)
 	zap.L().Debug("config", zap.String("config", string(cfgJSON)))
 
-	cmd, err := NewCmdRoot(ctx, cfg)
+	cmd, err := NewCmdRoot(ctx, cfg, version, revision)
 	if err != nil {
 		return errors.WithStack(err)
 	}
