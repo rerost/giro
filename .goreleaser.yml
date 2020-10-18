@@ -4,7 +4,19 @@ before:
   hooks:
     - go mod download
 builds:
-  - env:
+  - main: ./cmd/giro
+    id: "giro"
+    binary: giro
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+  - main: ./cmd/protoc-gen-reflection-server
+    id: "protoc-gen-reflection-server"
+    binary: protoc-gen-reflection-server
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
