@@ -7,11 +7,11 @@ package tools
 // tool dependencies
 import (
 	_ "github.com/golang/mock/mockgen"
-	_ "github.com/google/wire"
+	_ "github.com/google/wire/cmd/wire"
 )
 
 // If you want to use tools, please run the following command:
 //  go generate ./tools.go
 //
 //go:generate go build -v -o=./bin/mockgen github.com/golang/mock/mockgen
-//go:generate go build -v -o=./bin/wire github.com/google/wire
+//go:generate go build -v -o=./bin/wire github.com/google/wire/cmd/wire
