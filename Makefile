@@ -8,7 +8,7 @@ setup:
 
 PHONY: protoc
 protoc: 
-	protoc --go_out=${GOPATH}/src e2etest/dummyserver/echo.proto
+	protoc --go_out=plugins=grpc,paths=source_relative:. e2etest/dummyserver/echo.proto
 
 PHONY: generate
 generate: setup
