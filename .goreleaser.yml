@@ -39,3 +39,9 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  - github:
+      owner: rerost
+      name: homebrew-tools
+    folder: Formula
+    homepage: https://github.com/rerost/giro
