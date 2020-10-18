@@ -40,7 +40,7 @@ changelog:
       - '^docs:'
       - '^test:'
 brews:
-  - github:
+  - tap:
       owner: rerost
       name: homebrew-tools
     folder: Formula
