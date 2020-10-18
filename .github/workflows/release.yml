@@ -27,6 +27,7 @@ jobs:
         with:
           version: latest
           args: release --rm-dist
+        run: echo "bin" >> $GITHUB_PATH
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
