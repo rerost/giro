@@ -27,7 +27,7 @@ import (
 
 // Injectors from wire.go:
 
-func NewCmdRoot(ctx context.Context, cfg Config) (*cobra.Command, error) {
+func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revision) (*cobra.Command, error) {
 	reflectionAddr := ProvideReflectionAddr(cfg)
 	client, err := NewServerReflectionClient(ctx, reflectionAddr)
 	if err != nil {
@@ -47,7 +47,11 @@ func NewCmdRoot(ctx context.Context, cfg Config) (*cobra.Command, error) {
 	toJSONCmd := ProviderToJSONCmd(messageService)
 	toBinaryCmd := ProviderToBinaryCmd(messageService)
 	callCmd := ProviderCallCmd(serviceService)
-	command, err := ProviderCmdRoot(lsCmd, emptyJSONCmd, toJSONCmd, toBinaryCmd, callCmd)
+	versionCmd, err := ProviderVersionCmd(version, revision)
+	if err != nil {
+		return nil, err
+	}
+	command, err := ProviderCmdRoot(lsCmd, emptyJSONCmd, toJSONCmd, toBinaryCmd, callCmd, versionCmd)
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +292,25 @@ func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
 	return cmd
 }
 
-func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd) (*cobra.Command, error) {
+type VersionCmd *cobra.Command
+
+type Version string
+
+type Revision string
+
+func ProviderVersionCmd(version Version, revision Revision) (VersionCmd, error) {
+	cmd := &cobra.Command{
+		Use: "version",
+		RunE: func(ccmd *cobra.Command, args []string) error {
+			fmt.Sprintf("Version=%s, Revision=%s\n", version, revision)
+			return nil
+		},
+	}
+
+	return cmd, nil
+}
+
+func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "giro",
 		Short: "",
@@ -300,6 +322,7 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		toJSONCmd,
 		toBinaryCmd,
 		callCmd,
+		versionCmd,
 	)
 
 	return cmd, nil
