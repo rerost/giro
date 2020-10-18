@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
@@ -68,6 +69,7 @@ func NewConfig() (Config, error) {
 	pflag.BoolP("verbose", "", false, "")
 	pflag.BoolP("debug", "", false, "")
 
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
 	viper.BindPFlags(pflag.CommandLine)
 
