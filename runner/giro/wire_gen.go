@@ -302,7 +302,7 @@ func ProviderVersionCmd(version Version, revision Revision) (VersionCmd, error) 
 	cmd := &cobra.Command{
 		Use: "version",
 		RunE: func(ccmd *cobra.Command, args []string) error {
-			fmt.Sprintf("Version=%s, Revision=%s\n", version, revision)
+			fmt.Printf("Version=%s, Revision=%s\n", version, revision)
 			return nil
 		},
 	}

@@ -17,8 +17,8 @@ generate: setup
 
 PHONY: build
 build: setup generate
-	go build -o ${BIN_DIR}/giro ./cmd/giro
-	go build -o ${BIN_DIR}/protoc-gen-reflection-server ./cmd/protoc-gen-reflection-server
+	go build -ldflags="-X main.Version=0.0.0 -X main.Revision=testhash" -o ${BIN_DIR}/giro ./cmd/giro
+	go build -ldflags="-X main.Version=0.0.0 -X main.Revision=testhash" -o ${BIN_DIR}/protoc-gen-reflection-server ./cmd/protoc-gen-reflection-server
 
 .PHONY: mock
 mock:

@@ -13,6 +13,10 @@ builds:
       - linux
       - windows
       - darwin
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+      - -X main.Revision={{.ShortCommit}}
   - main: ./cmd/protoc-gen-reflection-server
     id: "protoc-gen-reflection-server"
     binary: protoc-gen-reflection-server
@@ -22,6 +26,10 @@ builds:
       - linux
       - windows
       - darwin
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+      - -X main.Revision={{.ShortCommit}}
 archives:
   - replacements:
       darwin: Darwin

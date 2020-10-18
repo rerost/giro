@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	Version  string
-	Revision string
+	Version  = "Empty"
+	Revision = "Empty"
 )
 
 func main() {
