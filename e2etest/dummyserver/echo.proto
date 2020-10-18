@@ -1,0 +1,17 @@
+syntax = "proto3";
+package rerost.giro.v1;
+
+option go_package = "github.com/rerost/giro/e2etest/dummyserver;echo_pb";
+
+message EchoRequest {
+  string message = 1;
+}
+
+message EchoResponse {
+  string message = 1;
+}
+
+service TestService {
+  rpc Echo(EchoRequest) returns (EchoResponse) {}
+}
+

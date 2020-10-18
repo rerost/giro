@@ -8,7 +8,7 @@ setup:
 
 PHONY: protoc
 protoc: 
-	protoc --go_out=${GOPATH}/src protos/hosts.proto
+	protoc --go_out=${GOPATH}/src e2etest/dummyserver/echo.proto
 
 PHONY: generate
 generate: setup
