@@ -12,6 +12,7 @@ import (
 	"github.com/google/wire"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
+	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
@@ -60,6 +61,7 @@ var base = wire.NewSet(
 	ProviderHostResolver,
 	ProvideReflectionAddr,
 	ProvideRPCAddr,
+	grpcreflectiface.NewClient,
 )
 
 type LsCmd *cobra.Command
@@ -67,9 +69,11 @@ type LsCmd *cobra.Command
 func ProviderLsCmd(serviceService service.ServiceService) LsCmd {
 	cmd := &cobra.Command{
 		Use:  "ls",
-		Args: cobra.MaximumNArgs(2),
-		RunE: func(ccmd *cobra.Command, args []string) error {
+		Args: cobra.ExactArgs(1),
+		RunE: func(ccmd *cobra.Command, arg []string) error {
 			ctx := ccmd.Context()
+
+			args := strings.Split(arg[0], "/")
 
 			switch len(args) {
 			case 0:
@@ -89,7 +93,13 @@ func ProviderLsCmd(serviceService service.ServiceService) LsCmd {
 					fmt.Println(mn)
 				}
 			case 2:
-				return errors.New("Unsupported")
+				srvs, err := serviceService.Ls(ctx, &args[0], &args[1])
+				if err != nil {
+					return errors.WithStack(err)
+				}
+				for _, mn := range srvs[0].MethodNames {
+					fmt.Println(mn)
+				}
 			}
 
 			return nil
@@ -112,7 +122,7 @@ func ProviderEmptyJSONCmd(messageeService message.MessageService) EmptyJSONCmd {
 				return errors.WithStack(err)
 			}
 
-			fmt.Println(json)
+			fmt.Println(string(json))
 
 			return nil
 		},

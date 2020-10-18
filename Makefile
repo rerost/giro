@@ -10,6 +10,16 @@ PHONY: protoc
 protoc: 
 	protoc --go_out=${GOPATH}/src protos/hosts.proto
 
+PHONY: generate
+generate: setup
+	go mod tidy
+	go generate ./...
+
+PHONY: build
+build: setup generate
+	go build -o ${BIN_DIR}/giro ./cmd/giro
+	go build -o ${BIN_DIR}/protoc-gen-reflection-server ./cmd/protoc-gen-reflection-server
+
 .PHONY: mock
 mock:
 	mockgen github.com/rerost/giro/domain/grpcreflectiface Client > mock/grpcreflectiface/client_test.go
