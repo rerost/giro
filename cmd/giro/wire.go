@@ -69,7 +69,7 @@ type LsCmd *cobra.Command
 func ProviderLsCmd(serviceService service.ServiceService) LsCmd {
 	cmd := &cobra.Command{
 		Use:  "ls",
-		Args: cobra.ExactArgs(1),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(ccmd *cobra.Command, arg []string) error {
 			ctx := ccmd.Context()
 
