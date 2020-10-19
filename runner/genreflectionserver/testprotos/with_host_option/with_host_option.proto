@@ -1,0 +1,26 @@
+syntax = "proto3";
+package runner.genreflectionserver.testdata.onefile;
+
+option go_package = "github.com/rerost/giro/runner/genreflectionserver/testdata/with_host_option;with_host_option_pb";
+
+import "protos/hosts.proto";
+
+message GiroTestRequest1 {
+}
+
+message GiroTestRequest2 {
+}
+
+message GiroTestResponse1 {
+}
+
+message GiroTestResponse2 {
+}
+
+service GiroService {
+  option (rerost.giro.host_option) = {
+    host: "localhost:5000"
+  };
+  rpc GiroTest1(GiroTestRequest1) returns (GiroTestResponse1) {}
+  rpc GiroTest2(GiroTestRequest2) returns (GiroTestResponse2) {}
+}

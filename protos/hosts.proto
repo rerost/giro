@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package rerost.giro.hosts;
+package rerost.giro;
 
 option go_package = "github.com/rerost/giro/pb;hosts_pb";
 
@@ -10,7 +10,7 @@ message HostOptions {
 	string host = 10;
 }
 
-extend google.protobuf.MessageOptions {
-	HostOptions host = 50000;
+extend google.protobuf.ServiceOptions {
+	HostOptions host_option = 50000;
 }
 

@@ -6,10 +6,11 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
+	hosts_pb "github.com/rerost/giro/pb"
 	"golang.org/x/tools/imports"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
@@ -33,10 +34,21 @@ func Run(req *pluginpb.CodeGeneratorRequest) (*pluginpb.CodeGeneratorResponse, e
 					ResponseTypeGoImportPath: string(m.Output.GoIdent.GoImportPath),
 				}
 			}
+
+			var host string
+			{
+				options := s.Desc.Options()
+				if options != nil {
+					hostOptions := proto.GetExtension(options, hosts_pb.E_HostOption).(*hosts_pb.HostOptions)
+					host = hostOptions.GetHost()
+				}
+			}
+
 			service := Service{
 				GoName:       s.GoName,
 				GoImportPath: string(f.GoImportPath),
 				Methods:      methods,
+				Host:         host,
 			}
 			rsf.ServiceRegistry = append(rsf.ServiceRegistry, service)
 		}
@@ -78,6 +90,7 @@ type Service struct {
 	GoName       string
 	Methods      []Method
 	GoImportPath string
+	Host         string
 }
 
 func (s Service) PackageName() string {

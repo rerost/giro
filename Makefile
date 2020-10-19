@@ -10,6 +10,7 @@ PHONY: testcase
 testcase:
 	protoc --include_imports --include_source_info --descriptor_set_out=runner/genreflectionserver/testdata/onefile.pb runner/genreflectionserver/testprotos/onefile/*.proto
 	protoc --include_imports --include_source_info --descriptor_set_out=runner/genreflectionserver/testdata/multifile.pb runner/genreflectionserver/testprotos/multifile/*.proto
+	protoc -I=/usr/local/include/ -I=. --include_imports --include_source_info --descriptor_set_out=runner/genreflectionserver/testdata/with_host_option.pb runner/genreflectionserver/testprotos/with_host_option/*.proto
 
 PHONY: protoc
 protoc: 
@@ -17,7 +18,7 @@ protoc:
 	protoc -I=/usr/local/include/ -I=. --go_out=${GOPATH}/src protos/hosts.proto
 
 PHONY: generate
-generate: setup
+generate: setup testcase protoc
 	go mod tidy
 	go generate ./...
 
