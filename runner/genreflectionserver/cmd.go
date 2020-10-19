@@ -234,6 +234,7 @@ func main() {
   {{- range $index, $service := .Services }}
   {{ $service.PackageName }}.Register{{$service.GoName}}Server(server, New{{ $service.PackageName }}{{ $service.GoName }}())
   {{- end }}
+	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
   reflection.Register(server)
 
   if err := server.Serve(lis); err != nil {

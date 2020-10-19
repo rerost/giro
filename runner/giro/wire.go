@@ -283,7 +283,28 @@ func ProviderVersionCmd(version Version, revision Revision) (VersionCmd, error) 
 	return cmd, nil
 }
 
-func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd) (*cobra.Command, error) {
+type HostCmd *cobra.Command
+
+func ProviderHostCmd(hostResolver host.HostResolver) (HostCmd, error) {
+	cmd := &cobra.Command{
+		Use:  "host",
+		Args: cobra.ExactArgs(1),
+		RunE: func(ccmd *cobra.Command, args []string) error {
+			ctx := ccmd.Context()
+			host, err := hostResolver.Resolve(ctx, args[0])
+			if err != nil {
+				return errors.WithStack(err)
+			}
+
+			fmt.Println(host)
+			return nil
+		},
+	}
+
+	return cmd, nil
+}
+
+func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd, hostCmd HostCmd) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "giro",
 		Short: "",
@@ -296,6 +317,7 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		toBinaryCmd,
 		callCmd,
 		versionCmd,
+		hostCmd,
 	)
 
 	return cmd, nil
@@ -310,6 +332,7 @@ func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revis
 		ProviderToBinaryCmd,
 		ProviderCallCmd,
 		ProviderVersionCmd,
+		ProviderHostCmd,
 		base,
 	)
 

@@ -18,7 +18,7 @@ message GiroTestResponse2 {
 }
 
 service GiroService {
-  option (rerost.giro.host_option) = {
+  option (rerost.giro.v1.host_option) = {
     host: "localhost:5000"
   };
   rpc GiroTest1(GiroTestRequest1) returns (GiroTestResponse1) {}

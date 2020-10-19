@@ -56,7 +56,11 @@ func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revis
 	if err != nil {
 		return nil, err
 	}
-	command, err := ProviderCmdRoot(lsCmd, emptyJSONCmd, toJSONCmd, toBinaryCmd, callCmd, versionCmd)
+	hostCmd, err := ProviderHostCmd(hostResolver)
+	if err != nil {
+		return nil, err
+	}
+	command, err := ProviderCmdRoot(lsCmd, emptyJSONCmd, toJSONCmd, toBinaryCmd, callCmd, versionCmd, hostCmd)
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +325,27 @@ func ProviderVersionCmd(version Version, revision Revision) (VersionCmd, error) 
 	return cmd, nil
 }
 
-func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd) (*cobra.Command, error) {
+type HostCmd *cobra.Command
+
+func ProviderHostCmd(hostResolver host.HostResolver) (HostCmd, error) {
+	cmd := &cobra.Command{
+		Use:  "host",
+		Args: cobra.ExactArgs(1),
+		RunE: func(ccmd *cobra.Command, args []string) error {
+			ctx := ccmd.Context()
+			host2, err := hostResolver.Resolve(ctx, args[0])
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			fmt.Println(host2)
+			return nil
+		},
+	}
+
+	return cmd, nil
+}
+
+func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd, hostCmd HostCmd) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "giro",
 		Short: "",
@@ -334,6 +358,7 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		toBinaryCmd,
 		callCmd,
 		versionCmd,
+		hostCmd,
 	)
 
 	return cmd, nil

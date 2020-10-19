@@ -7,8 +7,11 @@ import (
 	"net"
 
 	"github.com/pkg/errors"
+	hosts_pb "github.com/rerost/giro/pb"
 	"google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	status "google.golang.org/grpc/status"
 )
 
 func Run(port string) (func(), error) {
@@ -27,6 +30,30 @@ func (s *testServiceServerImpl) Echo(_ context.Context, req *EchoRequest) (*Echo
 	}, nil
 }
 
+func NewHostsServiceServer() hosts_pb.HostServiceServer {
+	return &hostsServiceServerImpl{
+		hosts: map[string]string{
+			"rerost.giro.v1.TestService": "localhost:5000",
+		},
+	}
+}
+
+type hostsServiceServerImpl struct {
+	hosts map[string]string
+}
+
+func (s *hostsServiceServerImpl) ListHosts(_ context.Context, req *hosts_pb.ListHostsRequest) (*hosts_pb.ListHostsResponse, error) {
+	serviceName := req.GetServiceName()
+	host, ok := s.hosts[serviceName]
+	if !ok {
+		return nil, status.Error(codes.NotFound, "NotFound")
+	}
+
+	return &hosts_pb.ListHostsResponse{
+		Host: host,
+	}, nil
+}
+
 func runServer(port string) (func(), error) {
 	log.Printf("listen: %v\n", port)
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", port))
@@ -37,6 +64,7 @@ func runServer(port string) (func(), error) {
 
 	server := grpc.NewServer()
 	RegisterTestServiceServer(server, newTestService())
+	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
 	reflection.Register(server)
 	go func() {
 		server.Serve(lis)

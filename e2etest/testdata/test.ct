@@ -3,7 +3,11 @@
 
 $ giro ls
 grpc.reflection.v1alpha.ServerReflection
+rerost.giro.v1.HostService
 rerost.giro.v1.TestService
+
+$ giro host rerost.giro.v1.TestService
+localhost:5000
 
 $ giro call rerost.giro.v1.TestService/Echo {"message":"Test"}
 {"message":"Test"}

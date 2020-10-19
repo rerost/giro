@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package rerost.giro;
+package rerost.giro.v1;
 
 option go_package = "github.com/rerost/giro/pb;hosts_pb";
 
