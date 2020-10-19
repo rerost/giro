@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 
+	hosts_pb "github.com/rerost/giro/pb"
 	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile "github.com/rerost/giro/runner/genreflectionserver/testdata/onefile"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -16,6 +17,27 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func NewHostsServiceServer() hosts_pb.HostServiceServer {
+	return &hostsServiceServerImpl{
+		hosts: map[string]string{},
+	}
+}
+
+type hostsServiceServerImpl struct {
+	hosts map[string]string
+}
+
+func (s *hostsServiceServerImpl) ListHosts(_ context.Context, req *hosts_pb.ListHostsRequest) (*hosts_pb.ListHostsResponse, error) {
+	serviceName := req.GetServiceName()
+	host, ok := s.hosts[serviceName]
+	if !ok {
+		return nil, status.Error(codes.NotFound, "NotFound")
+	}
+
+	return &hosts_pb.ListHostsResponse{
+		Host: host,
+	}, nil
+}
 func Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroService() github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.GiroServiceServer {
 	return &github_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroServiceImpl{}
 }
@@ -63,6 +85,7 @@ func main() {
 	healthpb.RegisterHealthServer(server, health.NewServer())
 	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterGiroServiceServer(server, Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroService())
 	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterBqvServiceServer(server, Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvService())
+	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
 	reflection.Register(server)
 
 	if err := server.Serve(lis); err != nil {

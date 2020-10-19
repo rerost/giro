@@ -10,16 +10,20 @@ PHONY: testcase
 testcase:
 	protoc --include_imports --include_source_info --descriptor_set_out=runner/genreflectionserver/testdata/onefile.pb runner/genreflectionserver/testprotos/onefile/*.proto
 	protoc --include_imports --include_source_info --descriptor_set_out=runner/genreflectionserver/testdata/multifile.pb runner/genreflectionserver/testprotos/multifile/*.proto
+	protoc -I=/usr/local/include/ -I=. --include_imports --include_source_info --descriptor_set_out=runner/genreflectionserver/testdata/with_host_option.pb runner/genreflectionserver/testprotos/with_host_option/*.proto
 
 PHONY: protoc
 protoc: 
-	protoc --go_out=plugins=grpc,paths=source_relative:. e2etest/dummyserver/echo.proto
-	protoc -I=/usr/local/include/ -I=. --go_out=${GOPATH}/src protos/hosts.proto
+	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc,paths=source_relative:. e2etest/dummyserver/echo.proto
+	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc:${GOPATH}/src protos/hosts.proto
 
-PHONY: generate
-generate: setup
+PHONY: generate-ci
+generate-ci: setup
 	go mod tidy
 	go generate ./...
+
+PHONY: generate
+generate: setup generate-ci testcase protoc
 
 PHONY: build
 build: setup generate

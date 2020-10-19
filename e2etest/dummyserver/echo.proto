@@ -3,6 +3,8 @@ package rerost.giro.v1;
 
 option go_package = "github.com/rerost/giro/e2etest/dummyserver;dummyserver";
 
+import "protos/hosts.proto";
+
 message EchoRequest {
   string message = 1;
 }
@@ -12,6 +14,9 @@ message EchoResponse {
 }
 
 service TestService {
+  option (rerost.giro.v1.host_option) = {
+    host: "localhost:5000"
+  };
   rpc Echo(EchoRequest) returns (EchoResponse) {}
 }
 

@@ -6,11 +6,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-cmdtest"
-	"github.com/phayes/freeport"
+	cmdtest "github.com/google/go-cmdtest"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/e2etest/dummyserver"
 	"github.com/rerost/giro/runner/giro"
+)
+
+const (
+	TestPort = 5000
 )
 
 func GiroCmd() int {
@@ -24,7 +27,6 @@ func GiroCmd() int {
 	ctx := context.Background()
 	cmd, err := giro.NewCmdRoot(ctx, giro.Config{
 		ReflectionServer: fmt.Sprintf("localhost:%s", port),
-		RpcServer:        fmt.Sprintf("localhost:%s", port),
 	}, "", "")
 
 	if err != nil {
@@ -40,11 +42,7 @@ func GiroCmd() int {
 }
 
 func startServer() (string, func(), error) {
-	port, err := freeport.GetFreePort()
-	if err != nil {
-		return "", func() {}, errors.WithStack(err)
-	}
-
+	port := TestPort
 	closer, err := dummyserver.Run(fmt.Sprint(port))
 	if err != nil {
 		return "", func() {}, errors.WithStack(err)

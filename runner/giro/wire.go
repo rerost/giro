@@ -17,6 +17,7 @@ import (
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
 	"github.com/rerost/giro/domain/service"
+	hosts_pb "github.com/rerost/giro/pb"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -26,12 +27,15 @@ import (
 type ReflectionAddr string
 type RPCAddr string
 
-func NewServerReflectionClient(ctx context.Context, reflectionAddr ReflectionAddr) (*grpcreflect.Client, error) {
+func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr) (*grpc.ClientConn, error) {
 	conn, err := grpc.DialContext(ctx, string(reflectionAddr), grpc.WithInsecure())
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
+	return conn, nil
+}
+func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (*grpcreflect.Client, error) {
 	client := grpcreflect.NewClient(ctx, grpc_reflection_v1alpha.NewServerReflectionClient(conn))
 
 	return client, nil
@@ -45,12 +49,14 @@ func ProvideRPCAddr(cfg Config) RPCAddr {
 	return RPCAddr(cfg.RpcServer)
 }
 
-func ProviderHostResolver(rpcAddr RPCAddr) (host.HostResolver, error) {
-	if rpcAddr == "" {
-		return nil, nil
+func ProviderHostResolver(conn *grpc.ClientConn, rpcAddr RPCAddr) (host.HostResolver, error) {
+	if rpcAddr != "" {
+		return host.NewConstHostResolver(string(rpcAddr)), nil
 	}
 
-	return host.NewConstHostResolver(string(rpcAddr)), nil
+	client := hosts_pb.NewHostServiceClient(conn)
+
+	return host.NewHostResolver(client), nil
 }
 
 var base = wire.NewSet(
@@ -62,6 +68,7 @@ var base = wire.NewSet(
 	ProvideReflectionAddr,
 	ProvideRPCAddr,
 	grpcreflectiface.NewClient,
+	NewServerReflectionConn,
 )
 
 type LsCmd *cobra.Command
@@ -276,7 +283,28 @@ func ProviderVersionCmd(version Version, revision Revision) (VersionCmd, error) 
 	return cmd, nil
 }
 
-func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd) (*cobra.Command, error) {
+type HostCmd *cobra.Command
+
+func ProviderHostCmd(hostResolver host.HostResolver) (HostCmd, error) {
+	cmd := &cobra.Command{
+		Use:  "host",
+		Args: cobra.ExactArgs(1),
+		RunE: func(ccmd *cobra.Command, args []string) error {
+			ctx := ccmd.Context()
+			host, err := hostResolver.Resolve(ctx, args[0])
+			if err != nil {
+				return errors.WithStack(err)
+			}
+
+			fmt.Println(host)
+			return nil
+		},
+	}
+
+	return cmd, nil
+}
+
+func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd, hostCmd HostCmd) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "giro",
 		Short: "",
@@ -289,6 +317,7 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		toBinaryCmd,
 		callCmd,
 		versionCmd,
+		hostCmd,
 	)
 
 	return cmd, nil
@@ -303,6 +332,7 @@ func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revis
 		ProviderToBinaryCmd,
 		ProviderCallCmd,
 		ProviderVersionCmd,
+		ProviderHostCmd,
 		base,
 	)
 
