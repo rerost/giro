@@ -14,3 +14,14 @@ extend google.protobuf.ServiceOptions {
 	HostOptions host_option = 50000;
 }
 
+message ListHostsRequest {
+  string service_name = 1;
+}
+
+message ListHostsResponse {
+  string host = 1;
+}
+
+service HostService {
+  rpc ListHosts(ListHostsRequest) returns (ListHostsResponse) {}
+}

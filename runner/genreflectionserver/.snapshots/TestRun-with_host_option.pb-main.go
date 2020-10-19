@@ -7,6 +7,8 @@ import (
 	"net"
 	"os"
 
+	github_com_rerost_giro_pb "github.com/rerost/giro/pb"
+	hosts_pb "github.com/rerost/giro/pb"
 	github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option "github.com/rerost/giro/runner/genreflectionserver/testdata/with_host_option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -16,6 +18,40 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func NewHostsServiceServer() hosts_pb.HostServiceServer {
+	return &hostsServiceServerImpl{
+		hosts: map[string]string{
+			"runner.genreflectionserver.testdata.onefile.GiroService": "localhost:5000",
+		},
+	}
+}
+
+type hostsServiceServerImpl struct {
+	hosts map[string]string
+}
+
+func (s *hostsServiceServerImpl) ListHosts(_ context.Context, req *hosts_pb.ListHostsRequest) (*hosts_pb.ListHostsResponse, error) {
+	serviceName := req.GetServiceName()
+	host, ok := s.hosts[serviceName]
+	if !ok {
+		return nil, status.Error(codes.NotFound, "NotFound")
+	}
+
+	return &hosts_pb.ListHostsResponse{
+		Host: host,
+	}, nil
+}
+func Newgithub_com_rerost_giro_pbHostService() github_com_rerost_giro_pb.HostServiceServer {
+	return &github_com_rerost_giro_pbHostServiceImpl{}
+}
+
+type github_com_rerost_giro_pbHostServiceImpl struct {
+}
+
+func (s *github_com_rerost_giro_pbHostServiceImpl) ListHosts(ctx context.Context, req *github_com_rerost_giro_pb.ListHostsRequest) (*github_com_rerost_giro_pb.ListHostsResponse, error) {
+	// TODO: Not yet implemented.
+	return nil, status.Error(codes.Unimplemented, "Dummy")
+}
 func Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroService() github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.GiroServiceServer {
 	return &github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroServiceImpl{}
 }
@@ -46,6 +82,7 @@ func main() {
 
 	server := grpc.NewServer()
 	healthpb.RegisterHealthServer(server, health.NewServer())
+	github_com_rerost_giro_pb.RegisterHostServiceServer(server, Newgithub_com_rerost_giro_pbHostService())
 	github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.RegisterGiroServiceServer(server, Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroService())
 	reflection.Register(server)
 

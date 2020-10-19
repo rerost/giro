@@ -49,6 +49,7 @@ func Run(req *pluginpb.CodeGeneratorRequest) (*pluginpb.CodeGeneratorResponse, e
 				GoImportPath: string(f.GoImportPath),
 				Methods:      methods,
 				Host:         host,
+				FullName:     string(s.Desc.FullName()),
 			}
 			rsf.ServiceRegistry = append(rsf.ServiceRegistry, service)
 		}
@@ -91,6 +92,7 @@ type Service struct {
 	Methods      []Method
 	GoImportPath string
 	Host         string
+	FullName     string
 }
 
 func (s Service) PackageName() string {
@@ -157,6 +159,7 @@ import (
   "os"
   "net"
 
+	hosts_pb "github.com/rerost/giro/pb"
   "google.golang.org/grpc"
   "google.golang.org/grpc/reflection"
   "google.golang.org/grpc/status"
@@ -168,6 +171,34 @@ import (
   {{ PackageName $goImportPath }} "{{ $goImportPath }}"
   {{- end }}
 )
+
+func NewHostsServiceServer() hosts_pb.HostServiceServer {
+        return &hostsServiceServerImpl{
+                hosts: map[string]string{
+                {{- range $index, $service := .Services}}
+                        {{- if ne $service.Host "" }}
+                        "{{ $service.FullName }}": "{{ $service.Host }}",
+                        {{- end }}
+                {{- end }}
+                },
+        }
+}
+
+type hostsServiceServerImpl struct {
+        hosts map[string]string
+}
+
+func (s *hostsServiceServerImpl)ListHosts(_ context.Context, req *hosts_pb.ListHostsRequest) (*hosts_pb.ListHostsResponse, error) {
+        serviceName := req.GetServiceName()
+        host, ok := s.hosts[serviceName]
+        if !ok {
+                return nil, status.Error(codes.NotFound, "NotFound")
+        }
+
+        return &hosts_pb.ListHostsResponse{
+                Host: host,
+        }, nil
+}
 
 {{- range $index, $service := .Services}}
 func New{{ $service.PackageName }}{{ $service.GoName }}() {{ $service.PackageName }}.{{ $service.GoName }}Server {
