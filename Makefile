@@ -18,7 +18,7 @@ protoc:
 	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc:${GOPATH}/src protos/hosts.proto
 
 PHONY: generate-ci
-generate-ci: setup testcase protoc
+generate-ci: setup
 	go mod tidy
 	go generate ./...
 
