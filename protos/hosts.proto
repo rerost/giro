@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package rerost.giro.hosts;
+
+option go_package = "github.com/rerost/giro/pb;hosts_pb";
+
+import "google/protobuf/descriptor.proto";
+
+message HostOptions {
+	string host = 10;
+}
+
+extend google.protobuf.MessageOptions {
+	HostOptions host = 50000;
+}
+

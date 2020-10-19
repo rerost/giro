@@ -9,6 +9,7 @@ setup:
 PHONY: protoc
 protoc: 
 	protoc --go_out=plugins=grpc,paths=source_relative:. e2etest/dummyserver/echo.proto
+	protoc -I=/usr/local/include/ -I=. --go_out=${GOPATH}/src protos/hosts.proto
 
 PHONY: generate
 generate: setup
