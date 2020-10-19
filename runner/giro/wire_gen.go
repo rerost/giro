@@ -16,6 +16,7 @@ import (
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
 	"github.com/rerost/giro/domain/service"
+	"github.com/rerost/giro/pb"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -29,13 +30,17 @@ import (
 
 func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revision) (*cobra.Command, error) {
 	reflectionAddr := ProvideReflectionAddr(cfg)
-	client, err := NewServerReflectionClient(ctx, reflectionAddr)
+	clientConn, err := NewServerReflectionConn(ctx, reflectionAddr)
+	if err != nil {
+		return nil, err
+	}
+	client, err := NewServerReflectionClient(ctx, clientConn)
 	if err != nil {
 		return nil, err
 	}
 	grpcreflectifaceClient := grpcreflectiface.NewClient(client)
 	rpcAddr := ProvideRPCAddr(cfg)
-	hostResolver, err := ProviderHostResolver(rpcAddr)
+	hostResolver, err := ProviderHostResolver(clientConn, rpcAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -64,12 +69,16 @@ type ReflectionAddr string
 
 type RPCAddr string
 
-func NewServerReflectionClient(ctx context.Context, reflectionAddr ReflectionAddr) (*grpcreflect.Client, error) {
+func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr) (*grpc.ClientConn, error) {
 	conn, err := grpc.DialContext(ctx, string(reflectionAddr), grpc.WithInsecure())
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
+	return conn, nil
+}
+
+func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (*grpcreflect.Client, error) {
 	client := grpcreflect.NewClient(ctx, grpc_reflection_v1alpha.NewServerReflectionClient(conn))
 
 	return client, nil
@@ -83,18 +92,20 @@ func ProvideRPCAddr(cfg Config) RPCAddr {
 	return RPCAddr(cfg.RpcServer)
 }
 
-func ProviderHostResolver(rpcAddr RPCAddr) (host.HostResolver, error) {
-	if rpcAddr == "" {
-		return nil, nil
+func ProviderHostResolver(conn *grpc.ClientConn, rpcAddr RPCAddr) (host.HostResolver, error) {
+	if rpcAddr != "" {
+		return host.NewConstHostResolver(string(rpcAddr)), nil
 	}
 
-	return host.NewConstHostResolver(string(rpcAddr)), nil
+	client := hosts_pb.NewHostServiceClient(conn)
+
+	return host.NewHostResolver(client), nil
 }
 
 var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient,
 	ProviderHostResolver,
 	ProvideReflectionAddr,
-	ProvideRPCAddr, grpcreflectiface.NewClient,
+	ProvideRPCAddr, grpcreflectiface.NewClient, NewServerReflectionConn,
 )
 
 type LsCmd *cobra.Command
