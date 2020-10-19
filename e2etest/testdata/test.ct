@@ -14,3 +14,14 @@ $ giro call rerost.giro.v1.TestService/Echo {"message":"Test"}
 
 $ giro empty_json rerost.giro.v1.EchoRequest
 {"message":""}
+
+$ giro call rerost.giro.v1.HostService/ListHosts {} --> FAIL
+Error: rpc error: code = NotFound desc = NotFound
+Usage:
+  giro call [flags]
+
+Flags:
+  -m, -- string   metadata. e.g key1:val1:key2:val2
+  -h, --help      help for call
+
+rpc error: code = NotFound desc = NotFound
