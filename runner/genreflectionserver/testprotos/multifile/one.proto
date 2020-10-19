@@ -1,0 +1,22 @@
+syntax = "proto3";
+package runner.genreflectionserver.testdata.onefile;
+
+option go_package = "github.com/rerost/giro/runner/genreflectionserver/testdata/onefile;onefile_pb";
+
+message GiroTestRequest1 {
+}
+
+message GiroTestRequest2 {
+}
+
+
+message GiroTestResponse1 {
+}
+
+message GiroTestResponse2 {
+}
+
+service GiroService {
+  rpc GiroTest1(GiroTestRequest1) returns (GiroTestResponse1) {}
+  rpc GiroTest2(GiroTestRequest2) returns (GiroTestResponse2) {}
+}
