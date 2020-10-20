@@ -3,7 +3,7 @@ package runner.genreflectionserver.testdata.onefile;
 
 option go_package = "github.com/rerost/giro/runner/genreflectionserver/testdata/with_host_option;with_host_option_pb";
 
-import "rerost/hosts.proto";
+import "rerost/giro/hosts.proto";
 
 message GiroTestRequest1 {
 }
