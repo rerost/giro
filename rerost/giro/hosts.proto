@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package rerost.giro.v1;
 
-option go_package = "github.com/rerost/giro/pb;hosts_pb";
+option go_package = "github.com/rerost/giro/pb/hosts/;hosts_pb";
 
 import "google/protobuf/descriptor.proto";
 
