@@ -3,7 +3,7 @@ package rerost.giro.v1;
 
 option go_package = "github.com/rerost/giro/e2etest/dummyserver;dummyserver";
 
-import "protos/hosts.proto";
+import "rerost/hosts.proto";
 
 message EchoRequest {
   string message = 1;
