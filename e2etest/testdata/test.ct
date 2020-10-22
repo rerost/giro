@@ -21,7 +21,7 @@ $ giro empty_json rerost.giro.v1.EchoRequest
 $ giro call rerost.giro.v1.HostService/ListHosts {} --> FAIL
 Error: rpc error: code = NotFound desc = NotFound
 Usage:
-  giro call [flags]
+  giro call <method> [message_body] [flags]
 
 Flags:
   -h, --help              help for call

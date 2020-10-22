@@ -7,7 +7,7 @@ import (
 	"text/template"
 
 	"github.com/pkg/errors"
-	hosts_pb "github.com/rerost/giro/pb"
+	hosts_pb "github.com/rerost/giro/pb/hosts"
 	"golang.org/x/tools/imports"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -159,7 +159,7 @@ import (
   "os"
   "net"
 
-	hosts_pb "github.com/rerost/giro/pb"
+	hosts_pb "github.com/rerost/giro/pb/hosts"
   "google.golang.org/grpc"
   "google.golang.org/grpc/reflection"
   "google.golang.org/grpc/status"

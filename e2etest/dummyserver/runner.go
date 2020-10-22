@@ -7,7 +7,7 @@ import (
 	"net"
 
 	"github.com/pkg/errors"
-	hosts_pb "github.com/rerost/giro/pb"
+	hosts_pb "github.com/rerost/giro/pb/hosts"
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
