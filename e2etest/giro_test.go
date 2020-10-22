@@ -1,7 +1,6 @@
 package e2etest_test
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -17,24 +16,14 @@ const (
 )
 
 func GiroCmd() int {
-	port, closer, err := startServer()
+	_, closer, err := startServer()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
 	defer closer()
 
-	ctx := context.Background()
-	cmd, err := giro.NewCmdRoot(ctx, giro.Config{
-		ReflectionServer: fmt.Sprintf("localhost:%s", port),
-		Metadata:         "key1:val1:key2:val2",
-	}, "", "")
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 1
-	}
-	if err := cmd.Execute(); err != nil {
+	if err := giro.Run("test", "test"); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
@@ -59,5 +48,5 @@ func TestGiro(t *testing.T) {
 	}
 
 	ts.Commands["giro"] = cmdtest.InProcessProgram("giro", GiroCmd)
-	ts.Run(t, false)
+	ts.Run(t, true)
 }

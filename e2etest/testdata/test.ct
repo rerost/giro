@@ -1,5 +1,8 @@
 # Command should fail, but doesn't.
 # Fatal error, so must be in its own file.
+#
+
+$ setenv REFLECTION_SERVER localhost:5000
 
 $ giro ls
 grpc.reflection.v1alpha.ServerReflection
@@ -9,7 +12,7 @@ rerost.giro.v1.TestService
 $ giro host rerost.giro.v1.TestService
 localhost:5000
 
-$ giro call rerost.giro.v1.TestService/Echo {"message":"Test"}
+$ giro call rerost.giro.v1.TestService/Echo {"message":"Test"} --metadata=key1:val1:key2:val2
 {"message":"Test","metadata":{"metadata":{":authority":{"value":["localhost:5000"]},"content-type":{"value":["application/grpc"]},"key1":{"value":["val1"]},"key2":{"value":["val2"]},"user-agent":{"value":["grpc-go/1.27.0"]}}}}
 
 $ giro empty_json rerost.giro.v1.EchoRequest
@@ -21,6 +24,13 @@ Usage:
   giro call [flags]
 
 Flags:
-  -h, --help   help for call
+  -h, --help              help for call
+  -m, --metadata string   metadata. e.g key1:val1:key2:val2
+
+Global Flags:
+      --debug                      
+  -r, --reflection-server string    (default "localhost:5000")
+      --rpc-server string          
+      --verbose
 
 rpc error: code = NotFound desc = NotFound
