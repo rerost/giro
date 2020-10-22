@@ -5,12 +5,22 @@ option go_package = "github.com/rerost/giro/e2etest/dummyserver;dummyserver";
 
 import "rerost/giro/hosts.proto";
 
+message MetadataValue {
+  repeated string value = 1;
+}
+
+message Metadata {
+  map<string, MetadataValue> metadata = 1;
+}
+
 message EchoRequest {
   string message = 1;
 }
 
 message EchoResponse {
   string message = 1;
+  // https://godoc.org/google.golang.org/grpc/metadata#MD
+  Metadata metadata = 2;
 }
 
 service TestService {
