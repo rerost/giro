@@ -30,7 +30,7 @@ type hostsServiceServerImpl struct {
 	hosts map[string]string
 }
 
-func (s *hostsServiceServerImpl) GetHosts(_ context.Context, req *hosts_pb.GetHostRequest) (*hosts_pb.GetHostResponse, error) {
+func (s *hostsServiceServerImpl) GetHost(_ context.Context, req *hosts_pb.GetHostRequest) (*hosts_pb.GetHostResponse, error) {
 	serviceName := req.GetServiceName()
 	host, ok := s.hosts[serviceName]
 	if !ok {
