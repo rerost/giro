@@ -168,7 +168,7 @@ type LsCmd *cobra.Command
 
 func ProviderLsCmd() LsCmd {
 	cmd := &cobra.Command{
-		Use:  "ls",
+		Use:  "ls [service|method]",
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(ccmd *cobra.Command, arg []string) error {
 			ctx := ccmd.Context()
@@ -219,7 +219,7 @@ type EmptyJSONCmd *cobra.Command
 
 func ProviderEmptyJSONCmd() EmptyJSONCmd {
 	cmd := &cobra.Command{
-		Use:  "empty_json",
+		Use:  "empty_json <message>",
 		Args: cobra.ExactArgs(1),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
@@ -245,7 +245,7 @@ type ToJSONCmd *cobra.Command
 
 func ProviderToJSONCmd() ToJSONCmd {
 	cmd := &cobra.Command{
-		Use:  "tojson",
+		Use:  "tojson <message> [message_body]",
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
@@ -280,7 +280,7 @@ type ToBinaryCmd *cobra.Command
 
 func ProviderToBinaryCmd() ToBinaryCmd {
 	cmd := &cobra.Command{
-		Use:  "tobinary",
+		Use:  "tobinary <message> [message_body]",
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
@@ -333,7 +333,7 @@ func ParseMetadata(m string) (map[string]string, error) {
 func ProviderCallCmd() CallCmd {
 	metadata := ""
 	cmd := &cobra.Command{
-		Use:  "call",
+		Use:  "call <method> [message_body]",
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
@@ -400,7 +400,7 @@ type HostCmd *cobra.Command
 
 func ProviderHostCmd() (HostCmd, error) {
 	cmd := &cobra.Command{
-		Use:  "host",
+		Use:  "host <service>",
 		Args: cobra.ExactArgs(1),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
