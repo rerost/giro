@@ -10,6 +10,7 @@ import (
 	hosts_pb "github.com/rerost/giro/pb"
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	status "google.golang.org/grpc/status"
 )
@@ -24,9 +25,25 @@ func newTestService() TestServiceServer {
 	return &testServiceServerImpl{}
 }
 
-func (s *testServiceServerImpl) Echo(_ context.Context, req *EchoRequest) (*EchoResponse, error) {
+func (s *testServiceServerImpl) Echo(ctx context.Context, req *EchoRequest) (*EchoResponse, error) {
+	md := map[string]*MetadataValue{}
+
+	metadata, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		_metadata := map[string][]string(metadata)
+
+		for k, v := range _metadata {
+			md[k] = &MetadataValue{
+				Value: v,
+			}
+		}
+	}
+
 	return &EchoResponse{
 		Message: req.GetMessage(),
+		Metadata: &Metadata{
+			Metadata: md,
+		},
 	}, nil
 }
 

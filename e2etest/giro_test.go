@@ -27,6 +27,7 @@ func GiroCmd() int {
 	ctx := context.Background()
 	cmd, err := giro.NewCmdRoot(ctx, giro.Config{
 		ReflectionServer: fmt.Sprintf("localhost:%s", port),
+		Metadata:         "key1:val1:key2:val2",
 	}, "", "")
 
 	if err != nil {

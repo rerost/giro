@@ -63,8 +63,13 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 
 	responseDynamicMessage, err := ss.messageService.ToDynamicMessage(ctx, responseMessageName, message.JSON("{}"))
 
-	m := metadata.New(md)
-	err = grpcClient.Invoke(ctx, ss.fullMethodName(serviceName, methodName), requestDynamicMessage, responseDynamicMessage, grpc.Header(&m))
+	cctx := ctx
+	for k, v := range md {
+		k := k
+		v := v
+		cctx = metadata.AppendToOutgoingContext(cctx, k, v)
+	}
+	err = grpcClient.Invoke(cctx, ss.fullMethodName(serviceName, methodName), requestDynamicMessage, responseDynamicMessage)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
