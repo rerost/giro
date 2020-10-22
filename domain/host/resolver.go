@@ -22,7 +22,7 @@ func NewHostResolver(client hosts_pb.HostServiceClient) HostResolver {
 }
 
 func (hr hostResolverImpl) Resolve(ctx context.Context, serviceName string) (string, error) {
-	res, err := hr.client.ListHosts(ctx, &hosts_pb.ListHostsRequest{
+	res, err := hr.client.GetHost(ctx, &hosts_pb.GetHostRequest{
 		ServiceName: serviceName,
 	})
 
