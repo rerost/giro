@@ -51,7 +51,11 @@ func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revis
 	emptyJSONCmd := ProviderEmptyJSONCmd(messageService)
 	toJSONCmd := ProviderToJSONCmd(messageService)
 	toBinaryCmd := ProviderToBinaryCmd(messageService)
-	callCmd := ProviderCallCmd(serviceService)
+	metadata, err := ProviderMetadata(cfg)
+	if err != nil {
+		return nil, err
+	}
+	callCmd := ProviderCallCmd(serviceService, metadata)
 	versionCmd, err := ProviderVersionCmd(version, revision)
 	if err != nil {
 		return nil, err
@@ -72,6 +76,8 @@ func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revis
 type ReflectionAddr string
 
 type RPCAddr string
+
+type Metadata map[string]string
 
 func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr) (*grpc.ClientConn, error) {
 	conn, err := grpc.DialContext(ctx, string(reflectionAddr), grpc.WithInsecure())
@@ -96,6 +102,18 @@ func ProvideRPCAddr(cfg Config) RPCAddr {
 	return RPCAddr(cfg.RpcServer)
 }
 
+func ProviderMetadata(cfg Config) (Metadata, error) {
+	parsedMeataData, err := ParseMetadata(cfg.Metadata)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	for k, v := range parsedMeataData {
+		zap.L().Debug("received metadata", zap.String(k, v))
+	}
+
+	return parsedMeataData, nil
+}
+
 func ProviderHostResolver(conn *grpc.ClientConn, rpcAddr RPCAddr) (host.HostResolver, error) {
 	if rpcAddr != "" {
 		return host.NewConstHostResolver(string(rpcAddr)), nil
@@ -110,6 +128,7 @@ var base = wire.NewSet(service.NewServiceService, message.NewMessageService, mes
 	ProviderHostResolver,
 	ProvideReflectionAddr,
 	ProvideRPCAddr, grpcreflectiface.NewClient, NewServerReflectionConn,
+	ProviderMetadata,
 )
 
 type LsCmd *cobra.Command
@@ -262,9 +281,7 @@ func ParseMetadata(m string) (map[string]string, error) {
 	return md, nil
 }
 
-func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
-	var metaData string
-
+func ProviderCallCmd(serviceService service.ServiceService, metadata Metadata) CallCmd {
 	cmd := &cobra.Command{
 		Use:  "call",
 		Args: cobra.RangeArgs(1, 2),
@@ -282,18 +299,10 @@ func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
 				body = string(b)
 			}
 
-			parsedMeataData, err := ParseMetadata(metaData)
-			if err != nil {
-				return errors.WithStack(err)
-			}
-			for k, v := range parsedMeataData {
-				zap.L().Debug("received metadata", zap.String(k, v))
-			}
-
 			tmp := strings.Split(args[0], "/")
 			svcName := tmp[0]
 			methodName := tmp[1]
-			bin, err := serviceService.Call(ctx, svcName, methodName, parsedMeataData, message.JSON(body))
+			bin, err := serviceService.Call(ctx, svcName, methodName, map[string]string(metadata), message.JSON(body))
 			if err != nil {
 				return errors.WithStack(err)
 			}
@@ -301,8 +310,6 @@ func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
 			return nil
 		},
 	}
-
-	cmd.Flags().StringVarP(&metaData, "", "m", "", "metadata. e.g key1:val1:key2:val2")
 
 	return cmd
 }
