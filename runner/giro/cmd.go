@@ -17,6 +17,7 @@ type Config struct {
 	RpcServer        string `mapstructure:"rpc-server"`
 	Debug            bool
 	Verbose          bool
+	Metadata         string
 }
 
 func Run(version Version, revision Revision) error {
@@ -68,6 +69,7 @@ func NewConfig() (Config, error) {
 	pflag.StringP("rpc-server", "", "", "")
 	pflag.BoolP("verbose", "", false, "")
 	pflag.BoolP("debug", "", false, "")
+	pflag.StringP("metadata", "m", "", "metadata. e.g key1:val1:key2:val2")
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()

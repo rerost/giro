@@ -21,7 +21,6 @@ Usage:
   giro call [flags]
 
 Flags:
-  -m, -- string   metadata. e.g key1:val1:key2:val2
-  -h, --help      help for call
+  -h, --help   help for call
 
 rpc error: code = NotFound desc = NotFound
