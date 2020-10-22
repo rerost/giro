@@ -18,6 +18,8 @@ import (
 	"github.com/rerost/giro/domain/service"
 	"github.com/rerost/giro/pb"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
@@ -28,35 +30,17 @@ import (
 
 // Injectors from wire.go:
 
-func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revision) (*cobra.Command, error) {
-	reflectionAddr := ProvideReflectionAddr(cfg)
-	clientConn, err := NewServerReflectionConn(ctx, reflectionAddr)
-	if err != nil {
-		return nil, err
-	}
-	client, err := NewServerReflectionClient(ctx, clientConn)
-	if err != nil {
-		return nil, err
-	}
-	grpcreflectifaceClient := grpcreflectiface.NewClient(client)
-	rpcAddr := ProvideRPCAddr(cfg)
-	hostResolver, err := ProviderHostResolver(clientConn, rpcAddr)
-	if err != nil {
-		return nil, err
-	}
-	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
-	messageService := message.NewMessageService(grpcreflectifaceClient)
-	serviceService := service.NewServiceService(grpcreflectifaceClient, hostResolver, messageNameResolver, messageService)
-	lsCmd := ProviderLsCmd(serviceService)
-	emptyJSONCmd := ProviderEmptyJSONCmd(messageService)
-	toJSONCmd := ProviderToJSONCmd(messageService)
-	toBinaryCmd := ProviderToBinaryCmd(messageService)
-	callCmd := ProviderCallCmd(serviceService)
+func NewCmdRoot(ctx context.Context, version Version, revision Revision) (*cobra.Command, error) {
+	lsCmd := ProviderLsCmd()
+	emptyJSONCmd := ProviderEmptyJSONCmd()
+	toJSONCmd := ProviderToJSONCmd()
+	toBinaryCmd := ProviderToBinaryCmd()
+	callCmd := ProviderCallCmd()
 	versionCmd, err := ProviderVersionCmd(version, revision)
 	if err != nil {
 		return nil, err
 	}
-	hostCmd, err := ProviderHostCmd(hostResolver)
+	hostCmd, err := ProviderHostCmd()
 	if err != nil {
 		return nil, err
 	}
@@ -67,11 +51,79 @@ func NewCmdRoot(ctx context.Context, cfg Config, version Version, revision Revis
 	return command, nil
 }
 
+func NewServiceService(contextContext context.Context, flagSet *pflag.FlagSet) (service.ServiceService, error) {
+	reflectionAddr := ProviderReflectionAddr()
+	clientConn, err := NewServerReflectionConn(contextContext, reflectionAddr)
+	if err != nil {
+		return nil, err
+	}
+	client, err := NewServerReflectionClient(contextContext, clientConn)
+	if err != nil {
+		return nil, err
+	}
+	grpcreflectifaceClient := grpcreflectiface.NewClient(client)
+	rpcAddr := ProviderRPCAddr()
+	hostResolver, err := ProviderHostResolver(clientConn, rpcAddr)
+	if err != nil {
+		return nil, err
+	}
+	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
+	messageService := message.NewMessageService(grpcreflectifaceClient)
+	serviceService := service.NewServiceService(grpcreflectifaceClient, hostResolver, messageNameResolver, messageService)
+	return serviceService, nil
+}
+
+func NewMessageService(contextContext context.Context, flagSet *pflag.FlagSet) (message.MessageService, error) {
+	reflectionAddr := ProviderReflectionAddr()
+	clientConn, err := NewServerReflectionConn(contextContext, reflectionAddr)
+	if err != nil {
+		return nil, err
+	}
+	client, err := NewServerReflectionClient(contextContext, clientConn)
+	if err != nil {
+		return nil, err
+	}
+	grpcreflectifaceClient := grpcreflectiface.NewClient(client)
+	messageService := message.NewMessageService(grpcreflectifaceClient)
+	return messageService, nil
+}
+
+func NewMessageNameResolver(contextContext context.Context, flagSet *pflag.FlagSet) (messagename.MessageNameResolver, error) {
+	reflectionAddr := ProviderReflectionAddr()
+	clientConn, err := NewServerReflectionConn(contextContext, reflectionAddr)
+	if err != nil {
+		return nil, err
+	}
+	client, err := NewServerReflectionClient(contextContext, clientConn)
+	if err != nil {
+		return nil, err
+	}
+	grpcreflectifaceClient := grpcreflectiface.NewClient(client)
+	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
+	return messageNameResolver, nil
+}
+
+func NewHostResolver(contextContext context.Context, flagSet *pflag.FlagSet) (host.HostResolver, error) {
+	reflectionAddr := ProviderReflectionAddr()
+	clientConn, err := NewServerReflectionConn(contextContext, reflectionAddr)
+	if err != nil {
+		return nil, err
+	}
+	rpcAddr := ProviderRPCAddr()
+	hostResolver, err := ProviderHostResolver(clientConn, rpcAddr)
+	if err != nil {
+		return nil, err
+	}
+	return hostResolver, nil
+}
+
 // wire.go:
 
 type ReflectionAddr string
 
 type RPCAddr string
+
+type Metadata map[string]string
 
 func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr) (*grpc.ClientConn, error) {
 	conn, err := grpc.DialContext(ctx, string(reflectionAddr), grpc.WithInsecure())
@@ -88,12 +140,12 @@ func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (*grp
 	return client, nil
 }
 
-func ProvideReflectionAddr(cfg Config) ReflectionAddr {
-	return ReflectionAddr(cfg.ReflectionServer)
+func ProviderReflectionAddr() ReflectionAddr {
+	return ReflectionAddr(config.ReflectionServer)
 }
 
-func ProvideRPCAddr(cfg Config) RPCAddr {
-	return RPCAddr(cfg.RpcServer)
+func ProviderRPCAddr() RPCAddr {
+	return RPCAddr(config.RpcServer)
 }
 
 func ProviderHostResolver(conn *grpc.ClientConn, rpcAddr RPCAddr) (host.HostResolver, error) {
@@ -106,20 +158,24 @@ func ProviderHostResolver(conn *grpc.ClientConn, rpcAddr RPCAddr) (host.HostReso
 	return host.NewHostResolver(client), nil
 }
 
-var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient,
+var fromConfigSet = wire.NewSet(
+	ProviderReflectionAddr,
+	ProviderRPCAddr,
 	ProviderHostResolver,
-	ProvideReflectionAddr,
-	ProvideRPCAddr, grpcreflectiface.NewClient, NewServerReflectionConn,
 )
 
 type LsCmd *cobra.Command
 
-func ProviderLsCmd(serviceService service.ServiceService) LsCmd {
+func ProviderLsCmd() LsCmd {
 	cmd := &cobra.Command{
-		Use:  "ls",
+		Use:  "ls [service|method]",
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(ccmd *cobra.Command, arg []string) error {
 			ctx := ccmd.Context()
+			serviceService, err := NewServiceService(ctx, ccmd.Flags())
+			if err != nil {
+				return errors.WithStack(err)
+			}
 
 			var args []string
 			if len(arg) == 1 {
@@ -161,12 +217,16 @@ func ProviderLsCmd(serviceService service.ServiceService) LsCmd {
 
 type EmptyJSONCmd *cobra.Command
 
-func ProviderEmptyJSONCmd(messageeService message.MessageService) EmptyJSONCmd {
+func ProviderEmptyJSONCmd() EmptyJSONCmd {
 	cmd := &cobra.Command{
-		Use:  "empty_json",
+		Use:  "empty_json <message>",
 		Args: cobra.ExactArgs(1),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
+			messageeService, err := NewMessageService(ctx, ccmd.Flags())
+			if err != nil {
+				return errors.WithStack(err)
+			}
 
 			json, err := messageeService.EmptyJSON(ctx, messagename.MessageName(args[0]))
 			if err != nil {
@@ -183,12 +243,16 @@ func ProviderEmptyJSONCmd(messageeService message.MessageService) EmptyJSONCmd {
 
 type ToJSONCmd *cobra.Command
 
-func ProviderToJSONCmd(messageeService message.MessageService) ToJSONCmd {
+func ProviderToJSONCmd() ToJSONCmd {
 	cmd := &cobra.Command{
-		Use:  "tojson",
+		Use:  "tojson <message> [message_body]",
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
+			messageeService, err := NewMessageService(ctx, ccmd.Flags())
+			if err != nil {
+				return errors.WithStack(err)
+			}
 
 			var body string
 			if len(args) == 2 {
@@ -214,12 +278,16 @@ func ProviderToJSONCmd(messageeService message.MessageService) ToJSONCmd {
 
 type ToBinaryCmd *cobra.Command
 
-func ProviderToBinaryCmd(messageeService message.MessageService) ToBinaryCmd {
+func ProviderToBinaryCmd() ToBinaryCmd {
 	cmd := &cobra.Command{
-		Use:  "tobinary",
+		Use:  "tobinary <message> [message_body]",
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
+			messageeService, err := NewMessageService(ctx, ccmd.Flags())
+			if err != nil {
+				return errors.WithStack(err)
+			}
 
 			var body string
 			if len(args) == 2 {
@@ -262,14 +330,17 @@ func ParseMetadata(m string) (map[string]string, error) {
 	return md, nil
 }
 
-func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
-	var metaData string
-
+func ProviderCallCmd() CallCmd {
+	metadata := ""
 	cmd := &cobra.Command{
-		Use:  "call",
+		Use:  "call <method> [message_body]",
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
+			serviceService, err := NewServiceService(ctx, ccmd.Flags())
+			if err != nil {
+				return errors.WithStack(err)
+			}
 
 			var body string
 			if len(args) == 2 {
@@ -282,7 +353,7 @@ func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
 				body = string(b)
 			}
 
-			parsedMeataData, err := ParseMetadata(metaData)
+			parsedMeataData, err := ParseMetadata(metadata)
 			if err != nil {
 				return errors.WithStack(err)
 			}
@@ -302,7 +373,7 @@ func ProviderCallCmd(serviceService service.ServiceService) CallCmd {
 		},
 	}
 
-	cmd.Flags().StringVarP(&metaData, "", "m", "", "metadata. e.g key1:val1:key2:val2")
+	cmd.Flags().StringVarP(&metadata, "metadata", "m", "", "metadata. e.g key1:val1:key2:val2")
 
 	return cmd
 }
@@ -327,12 +398,16 @@ func ProviderVersionCmd(version Version, revision Revision) (VersionCmd, error) 
 
 type HostCmd *cobra.Command
 
-func ProviderHostCmd(hostResolver host.HostResolver) (HostCmd, error) {
+func ProviderHostCmd() (HostCmd, error) {
 	cmd := &cobra.Command{
-		Use:  "host",
+		Use:  "host <service>",
 		Args: cobra.ExactArgs(1),
 		RunE: func(ccmd *cobra.Command, args []string) error {
 			ctx := ccmd.Context()
+			hostResolver, err := NewHostResolver(ctx, ccmd.Flags())
+			if err != nil {
+				return errors.WithStack(err)
+			}
 			host2, err := hostResolver.Resolve(ctx, args[0])
 			if err != nil {
 				return errors.WithStack(err)
@@ -344,6 +419,8 @@ func ProviderHostCmd(hostResolver host.HostResolver) (HostCmd, error) {
 
 	return cmd, nil
 }
+
+var config Config
 
 func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd, hostCmd HostCmd) (*cobra.Command, error) {
 	cmd := &cobra.Command{
@@ -361,5 +438,45 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		hostCmd,
 	)
 
+	cmd.PersistentFlags().StringP("reflection-server", "r", "localhost:5000", "")
+	cmd.PersistentFlags().StringP("rpc-server", "", "", "")
+	cmd.PersistentFlags().BoolP("verbose", "", false, "")
+	cmd.PersistentFlags().BoolP("debug", "", false, "")
+	cobra.OnInitialize(func() {
+		flags := cmd.PersistentFlags()
+		v := viper.New()
+		v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+		v.AutomaticEnv()
+		v.BindPFlags(cmd.Flags())
+		flags.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{
+			UnknownFlags: true,
+		}
+
+		err := flags.Parse(os.Args[1:])
+		if err != nil {
+			panic(err)
+		}
+
+		var cfg Config
+		err = v.Unmarshal(&cfg)
+		if err != nil {
+			panic(err)
+		}
+
+		config = cfg
+
+		zcfg := zap.NewProductionConfig()
+		if cfg.Debug {
+			zcfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+		}
+		if cfg.Verbose {
+			zcfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+		}
+		l, err := zcfg.Build()
+		zap.ReplaceGlobals(l)
+	})
+
 	return cmd, nil
 }
+
+var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient, grpcreflectiface.NewClient, NewServerReflectionConn)
