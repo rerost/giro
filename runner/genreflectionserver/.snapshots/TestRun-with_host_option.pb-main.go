@@ -82,7 +82,6 @@ func main() {
 
 	server := grpc.NewServer()
 	healthpb.RegisterHealthServer(server, health.NewServer())
-	github_com_rerost_giro_pb_hosts.RegisterHostServiceServer(server, Newgithub_com_rerost_giro_pb_hostsHostService())
 	github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.RegisterGiroServiceServer(server, Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroService())
 	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
 	reflection.Register(server)

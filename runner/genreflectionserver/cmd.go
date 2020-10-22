@@ -232,7 +232,9 @@ func main() {
   server := grpc.NewServer()
   healthpb.RegisterHealthServer(server, health.NewServer())
   {{- range $index, $service := .Services }}
+  {{- if ne $service.PackageName "github_com_rerost_giro_pb_hosts" }}
   {{ $service.PackageName }}.Register{{$service.GoName}}Server(server, New{{ $service.PackageName }}{{ $service.GoName }}())
+  {{- end }}
   {{- end }}
 	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
   reflection.Register(server)
