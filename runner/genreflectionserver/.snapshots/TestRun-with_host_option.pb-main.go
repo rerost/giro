@@ -7,8 +7,8 @@ import (
 	"net"
 	"os"
 
-	github_com_rerost_giro_pb "github.com/rerost/giro/pb"
-	hosts_pb "github.com/rerost/giro/pb"
+	github_com_rerost_giro_pb_hosts "github.com/rerost/giro/pb/hosts"
+	hosts_pb "github.com/rerost/giro/pb/hosts"
 	github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option "github.com/rerost/giro/runner/genreflectionserver/testdata/with_host_option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -41,14 +41,14 @@ func (s *hostsServiceServerImpl) ListHosts(_ context.Context, req *hosts_pb.List
 		Host: host,
 	}, nil
 }
-func Newgithub_com_rerost_giro_pbHostService() github_com_rerost_giro_pb.HostServiceServer {
-	return &github_com_rerost_giro_pbHostServiceImpl{}
+func Newgithub_com_rerost_giro_pb_hostsHostService() github_com_rerost_giro_pb_hosts.HostServiceServer {
+	return &github_com_rerost_giro_pb_hostsHostServiceImpl{}
 }
 
-type github_com_rerost_giro_pbHostServiceImpl struct {
+type github_com_rerost_giro_pb_hostsHostServiceImpl struct {
 }
 
-func (s *github_com_rerost_giro_pbHostServiceImpl) ListHosts(ctx context.Context, req *github_com_rerost_giro_pb.ListHostsRequest) (*github_com_rerost_giro_pb.ListHostsResponse, error) {
+func (s *github_com_rerost_giro_pb_hostsHostServiceImpl) ListHosts(ctx context.Context, req *github_com_rerost_giro_pb_hosts.ListHostsRequest) (*github_com_rerost_giro_pb_hosts.ListHostsResponse, error) {
 	// TODO: Not yet implemented.
 	return nil, status.Error(codes.Unimplemented, "Dummy")
 }
@@ -82,7 +82,7 @@ func main() {
 
 	server := grpc.NewServer()
 	healthpb.RegisterHealthServer(server, health.NewServer())
-	github_com_rerost_giro_pb.RegisterHostServiceServer(server, Newgithub_com_rerost_giro_pbHostService())
+	github_com_rerost_giro_pb_hosts.RegisterHostServiceServer(server, Newgithub_com_rerost_giro_pb_hostsHostService())
 	github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.RegisterGiroServiceServer(server, Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroService())
 	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
 	reflection.Register(server)

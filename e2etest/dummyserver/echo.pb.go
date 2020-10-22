@@ -9,7 +9,7 @@ package dummyserver
 import (
 	context "context"
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/rerost/giro/pb/hosts/"
+	_ "github.com/rerost/giro/pb/hosts"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
