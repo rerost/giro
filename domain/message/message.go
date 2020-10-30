@@ -15,6 +15,7 @@ type Binary []byte
 
 type MessageService interface {
 	EmptyJSON(ctx context.Context, messageName messagename.MessageName) (JSON, error)
+	RequestExample(ctx context.Context, serviceName string, methodName string) (JSON, error)
 	ToJSON(ctx context.Context, messageName messagename.MessageName, binary Binary) (JSON, error)
 	ToBinary(ctx context.Context, messageName messagename.MessageName, json JSON) (Binary, error)
 	// NOTE: For internal.
@@ -23,13 +24,15 @@ type MessageService interface {
 }
 
 type messageServiceImpl struct {
-	grpcreflectClient grpcreflectiface.Client
-	jsonMarshaler     *jsonpb.Marshaler
+	grpcreflectClient   grpcreflectiface.Client
+	messageNameResolver messagename.MessageNameResolver
+	jsonMarshaler       *jsonpb.Marshaler
 }
 
-func NewMessageService(client grpcreflectiface.Client) MessageService {
+func NewMessageService(client grpcreflectiface.Client, messageNameResolver messagename.MessageNameResolver) MessageService {
 	return &messageServiceImpl{
-		grpcreflectClient: client,
+		grpcreflectClient:   client,
+		messageNameResolver: messageNameResolver,
 		jsonMarshaler: &jsonpb.Marshaler{
 			EmitDefaults: true,
 		},
@@ -50,6 +53,20 @@ func (ms messageServiceImpl) EmptyJSON(ctx context.Context, messageName messagen
 	}
 
 	return JSON(json), nil
+}
+
+func (ms messageServiceImpl) RequestExample(ctx context.Context, serviceName string, methodName string) (JSON, error) {
+	requestMessageName, err := ms.messageNameResolver.RequestMessageName(ctx, serviceName, methodName)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	res, err := ms.EmptyJSON(ctx, requestMessageName)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return res, nil
 }
 
 func (ms messageServiceImpl) ToJSON(ctx context.Context, messageName messagename.MessageName, binary Binary) (JSON, error) {
