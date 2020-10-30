@@ -412,6 +412,8 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		// TODO call l.Sync()
 
 		zap.ReplaceGlobals(l)
+
+		zap.L().Debug("config", zap.Any("config", config))
 	})
 
 	return cmd, nil
