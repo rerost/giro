@@ -48,7 +48,7 @@ func Newgithub_com_rerost_giro_pb_hostsHostService() github_com_rerost_giro_pb_h
 type github_com_rerost_giro_pb_hostsHostServiceImpl struct {
 }
 
-func (s *github_com_rerost_giro_pb_hostsHostServiceImpl) ListHosts(ctx context.Context, req *github_com_rerost_giro_pb_hosts.ListHostsRequest) (*github_com_rerost_giro_pb_hosts.ListHostsResponse, error) {
+func (s *github_com_rerost_giro_pb_hostsHostServiceImpl) GetHost(ctx context.Context, req *github_com_rerost_giro_pb_hosts.GetHostRequest) (*github_com_rerost_giro_pb_hosts.GetHostResponse, error) {
 	// TODO: Not yet implemented.
 	return nil, status.Error(codes.Unimplemented, "Dummy")
 }

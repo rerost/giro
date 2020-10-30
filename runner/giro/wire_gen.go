@@ -44,7 +44,8 @@ func NewCmdRoot(ctx context.Context, version Version, revision Revision) (*cobra
 	if err != nil {
 		return nil, err
 	}
-	command, err := ProviderCmdRoot(lsCmd, emptyJSONCmd, toJSONCmd, toBinaryCmd, callCmd, versionCmd, hostCmd)
+	requestExampleCmd := ProviderRequestExampleCmd()
+	command, err := ProviderCmdRoot(lsCmd, emptyJSONCmd, toJSONCmd, toBinaryCmd, callCmd, versionCmd, hostCmd, requestExampleCmd)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func NewServiceService(contextContext context.Context, flagSet *pflag.FlagSet) (
 		return nil, err
 	}
 	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
-	messageService := message.NewMessageService(grpcreflectifaceClient)
+	messageService := message.NewMessageService(grpcreflectifaceClient, messageNameResolver)
 	serviceService := service.NewServiceService(grpcreflectifaceClient, hostResolver, messageNameResolver, messageService)
 	return serviceService, nil
 }
@@ -84,7 +85,8 @@ func NewMessageService(contextContext context.Context, flagSet *pflag.FlagSet) (
 		return nil, err
 	}
 	grpcreflectifaceClient := grpcreflectiface.NewClient(client)
-	messageService := message.NewMessageService(grpcreflectifaceClient)
+	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
+	messageService := message.NewMessageService(grpcreflectifaceClient, messageNameResolver)
 	return messageService, nil
 }
 
@@ -212,6 +214,33 @@ func ProviderLsCmd() LsCmd {
 			return nil
 		},
 	}
+	return cmd
+}
+
+type RequestExampleCmd *cobra.Command
+
+func ProviderRequestExampleCmd() RequestExampleCmd {
+	cmd := &cobra.Command{
+		Use:  "request_example <method>",
+		Args: cobra.ExactArgs(1),
+		RunE: func(ccmd *cobra.Command, rawArgs []string) error {
+			ctx := ccmd.Context()
+			args := strings.Split(rawArgs[0], "/")
+			messageeService, err := NewMessageService(ctx, ccmd.Flags())
+			if err != nil {
+				return errors.WithStack(err)
+			}
+
+			json, err := messageeService.RequestExample(ctx, args[0], args[1])
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			fmt.Println(string(json))
+
+			return nil
+		},
+	}
+
 	return cmd
 }
 
@@ -422,7 +451,7 @@ func ProviderHostCmd() (HostCmd, error) {
 
 var config Config
 
-func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd, hostCmd HostCmd) (*cobra.Command, error) {
+func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd, toBinaryCmd ToBinaryCmd, callCmd CallCmd, versionCmd VersionCmd, hostCmd HostCmd, requestExampleCmd RequestExampleCmd) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "giro",
 		Short: "",
@@ -436,6 +465,7 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		callCmd,
 		versionCmd,
 		hostCmd,
+		requestExampleCmd,
 	)
 
 	cmd.PersistentFlags().StringP("reflection-server", "r", "localhost:5000", "")
@@ -474,6 +504,7 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 		}
 		l, err := zcfg.Build()
 		zap.ReplaceGlobals(l)
+		zap.L().Debug("config", zap.Any("config", config))
 	})
 
 	return cmd, nil
