@@ -3,7 +3,7 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/rerost/giro)](http://github.com/rerost/giro/releases/latest)
 [![license](https://img.shields.io/github/license/rerost/giro.svg)](./LICENSE)
 
-An alternative to grpc_cli that can be used on servers without Server Reflection
+An alternative to [`grpc_cli`](https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md) that can be used on servers without Server Reflection
 
 ## Installation
 ### macOS
