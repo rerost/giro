@@ -6,10 +6,12 @@ require 'google/protobuf'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("protos/one/one.proto", :syntax => :proto3) do
     add_message "example.multiple_package.protos.one.GiroTestRequest1" do
+      optional :message, :string, 1
     end
     add_message "example.multiple_package.protos.one.GiroTestRequest2" do
     end
     add_message "example.multiple_package.protos.one.GiroTestResponse1" do
+      optional :message, :string, 1
     end
     add_message "example.multiple_package.protos.one.GiroTestResponse2" do
     end

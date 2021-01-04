@@ -9,8 +9,8 @@ require "protos/two/two_services_pb"
 require 'grpc'
 
 class GiroService < Example::MultiplePackage::Protos::One::GiroService::Service
-  def giro_test1(_req, _call)
-    return Example::MultiplePackage::Protos::One::GiroTestResponse1.new
+  def giro_test1(req, _call)
+    return Example::MultiplePackage::Protos::One::GiroTestResponse1.new(message: req.message)
   end
 
   def giro_test2(_req, _call)

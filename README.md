@@ -44,6 +44,6 @@ example.multiple_package.protos.twofile.BqvService
 grpc.health.v1.Health
 grpc.reflection.v1alpha.ServerReflection
 rerost.giro.v1.HostService
-$ giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{}'
-{}
+$ giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}'
+{"message":"test"}
 ```

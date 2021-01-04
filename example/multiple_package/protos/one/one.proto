@@ -4,6 +4,7 @@ package example.multiple_package.protos.one;
 option go_package = "github.com/rerost/giro/example/multiple_package/protos/one;one_pb";
 
 message GiroTestRequest1 {
+  string message = 1;
 }
 
 message GiroTestRequest2 {
@@ -11,6 +12,7 @@ message GiroTestRequest2 {
 
 
 message GiroTestResponse1 {
+  string message = 1;
 }
 
 message GiroTestResponse2 {
