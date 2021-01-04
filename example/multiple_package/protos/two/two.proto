@@ -1,0 +1,21 @@
+syntax = "proto3";
+package example.multiple_package.protos.twofile;
+
+option go_package = "github.com/rerost/giro/example/multiple_package/protos/two;two_pb";
+
+message BqvTestRequest1 {
+}
+
+message BqvTestRequest2 {
+}
+
+message BqvTestResponse1 {
+}
+
+message BqvTestResponse2 {
+}
+
+service BqvService {
+  rpc BqvTest1(BqvTestRequest1) returns (BqvTestResponse1) {}
+  rpc BqvTest2(BqvTestRequest2) returns (BqvTestResponse2) {}
+}
