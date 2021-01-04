@@ -34,7 +34,8 @@ def main
   s.add_http2_port(addr, :this_port_is_insecure)
   puts "Listing " + addr
 
-  s.handle(GiroService.new())
+  s.handle(GiroService.new)
+  s.handle(BqvService.new)
   s.run_till_terminated
 end
 
