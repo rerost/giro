@@ -15,5 +15,34 @@ brew install rerost/tools/giro
 https://github.com/rerost/giro/releases
 
 
-## Example
-WIP
+## Tutorial
+```
+$ git clone https://github.com/rerost/giro.git giro
+$ cd giro/example/multiple_package
+```
+
+### Create & Run reflection server
+```
+$ protoc --go_out=plugins=grpc,paths=source_relative:.  --reflection-server_out=. $(find  . -name '*.proto')
+$ go run main.go
+```
+
+### Run gRPC Server
+```
+cd example/multiple_package/server
+docker build -t test .
+docker run -it -p 5001:5001 test
+cd ../../../
+```
+
+### Unary call with giro
+```
+$ giro ls
+example.multiple_package.protos.one.GiroService
+example.multiple_package.protos.twofile.BqvService
+grpc.health.v1.Health
+grpc.reflection.v1alpha.ServerReflection
+rerost.giro.v1.HostService
+$ giro call --rpc-server=0.0.0.0:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{}'
+{}
+```
