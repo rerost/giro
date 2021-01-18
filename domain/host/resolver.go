@@ -27,7 +27,7 @@ func (hr hostResolverImpl) Resolve(ctx context.Context, serviceName string) (str
 	})
 
 	if err != nil {
-		return "", errors.WithStack(err)
+		return "", errors.WithStack(errors.WithMessage(err, "GetHost Error"))
 	}
 
 	return res.GetHost(), nil
