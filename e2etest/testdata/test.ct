@@ -18,8 +18,9 @@ $ giro call rerost.giro.v1.TestService/Echo {"message":"Test"} --metadata=key1:v
 $ giro empty_json rerost.giro.v1.EchoRequest
 {"message":""}
 
-$ giro call rerost.giro.v1.HostService/ListHosts {} --> FAIL
-Error: rpc error: code = NotFound desc = NotFound
+# Typo service
+$ giro call rerost.giro.v1.TypoService/Echo '{}' --rpc-server=localhost:5000 --> FAIL
+Error: Service not found: rerost.giro.v1.TypoService
 Usage:
   giro call <method> [message_body] [flags]
 
@@ -33,4 +34,22 @@ Global Flags:
       --rpc-server string          
       --verbose
 
-rpc error: code = NotFound desc = NotFound
+Service not found: rerost.giro.v1.TypoService
+
+# Typo method
+$ giro call rerost.giro.v1.TestService/Typo '{}' --rpc-server=localhost:5000 --> FAIL
+Error: Method not Found
+Usage:
+  giro call <method> [message_body] [flags]
+
+Flags:
+  -h, --help              help for call
+  -m, --metadata string   metadata. e.g key1:val1:key2:val2
+
+Global Flags:
+      --debug                      
+  -r, --reflection-server string    (default "localhost:5000")
+      --rpc-server string          
+      --verbose
+
+Method not Found

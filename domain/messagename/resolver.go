@@ -25,6 +25,10 @@ func NewMessageNameResolver(client grpcreflectiface.Client) MessageNameResolver 
 	}
 }
 
+var (
+	MethodNotFoundError = errors.New("Method not Found")
+)
+
 func (mnr *messageNameResolverImpl) RequestMessageName(ctx context.Context, serviceName string, methodName string) (MessageName, error) {
 	md, err := mnr.resolveMethodDescriptor(ctx, serviceName, methodName)
 	if err != nil {
@@ -52,5 +56,8 @@ func (mnr *messageNameResolverImpl) resolveMethodDescriptor(ctx context.Context,
 	}
 
 	md := sd.FindMethodByName(methodName)
+	if md == nil {
+		return nil, errors.WithStack(MethodNotFoundError)
+	}
 	return md, nil
 }
