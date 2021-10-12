@@ -1,6 +1,6 @@
 module github.com/rerost/giro
 
-go 1.14
+go 1.16
 
 require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
