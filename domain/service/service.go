@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
@@ -14,7 +15,7 @@ import (
 )
 
 type ServiceService interface {
-	Call(ctx context.Context, serviceName string, methodName string, metadata map[string]string, body message.JSON) (message.JSON, error)
+	Call(ctx context.Context, serviceName string, methodName string, metadata map[string]string, body message.JSON, callTimeout time.Duration) (message.JSON, error)
 	Ls(ctx context.Context, serviceName *string, methodName *string) ([]Service, error)
 }
 
@@ -40,7 +41,7 @@ func NewServiceService(grpcreflectClient grpcreflectiface.Client, hostResolver h
 	}
 }
 
-func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, methodName string, md map[string]string, body message.JSON) (message.JSON, error) {
+func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, methodName string, md map[string]string, body message.JSON, callTimeout time.Duration) (message.JSON, error) {
 	grpcClient, err := ss.NewClient(ctx, serviceName)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -68,6 +69,12 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 		k := k
 		v := v
 		cctx = metadata.AppendToOutgoingContext(cctx, k, v)
+	}
+
+	if callTimeout != 0 {
+		var cancel context.CancelFunc
+		cctx, cancel = context.WithTimeout(cctx, callTimeout)
+		defer cancel()
 	}
 	err = grpcClient.Invoke(cctx, ss.fullMethodName(serviceName, methodName), requestDynamicMessage, responseDynamicMessage)
 	if err != nil {
