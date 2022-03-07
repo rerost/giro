@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/google/wire"
 	"github.com/jhump/protoreflect/grpcreflect"
@@ -266,6 +267,7 @@ func ParseMetadata(m string) (map[string]string, error) {
 
 func ProviderCallCmd() CallCmd {
 	metadata := ""
+	var callTimeout int
 	cmd := &cobra.Command{
 		Use:  "call <method> [message_body]",
 		Args: cobra.RangeArgs(1, 2),
@@ -298,7 +300,7 @@ func ProviderCallCmd() CallCmd {
 			tmp := strings.Split(args[0], "/")
 			svcName := tmp[0]
 			methodName := tmp[1]
-			bin, err := serviceService.Call(ctx, svcName, methodName, parsedMeataData, message.JSON(body))
+			bin, err := serviceService.Call(ctx, svcName, methodName, parsedMeataData, message.JSON(body), time.Duration(callTimeout)*time.Second)
 			if err != nil {
 				return errors.WithStack(err)
 			}
@@ -308,6 +310,7 @@ func ProviderCallCmd() CallCmd {
 	}
 
 	cmd.Flags().StringVarP(&metadata, "metadata", "m", "", "metadata. e.g key1:val1:key2:val2")
+	cmd.Flags().IntVarP(&callTimeout, "call-timeout", "t", 0, "call timeout seconds")
 
 	return cmd
 }
