@@ -11,71 +11,54 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.13
-      id: go
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+      id: go
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
     - name: test
       run: go test -v -coverprofile=covprofile ./...
-    - name: Install goveralls
-      env:
-        GO111MODULE: off
-      run: go get github.com/mattn/goveralls
-    - name: Send coverage
-      env:
-        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: goveralls -coverprofile=covprofile -service=github
   build_giro:
     name: Build Giro
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.13
-      id: go
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+      id: go
     - name: Build giro
       run: go build ./cmd/giro
   build_protoc_gen_reflection_server:
     name: Build protoc-gen-reflection-server
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.13
-      id: go
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+      id: go
     - name: Build protoc-gen-reflection-server
       run: go build ./cmd/protoc-gen-reflection-server
   check_generate:
     name: Check generate
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.13
-      id: go
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+      id: go
     - name: make generate-ci
       run: make generate-ci
