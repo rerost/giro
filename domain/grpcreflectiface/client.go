@@ -1,3 +1,5 @@
+//go:generate go run go.uber.org/mock/mockgen@v0.4.0 -source=./client.go -destination=../../mock/grpcreflectiface/client_test.go -package=mockgrpcreflectiface
+
 package grpcreflectiface
 
 import (

@@ -3,8 +3,7 @@ export PATH := ${BIN_DIR}:${PATH}
 
 PHONY: setup
 setup:
-	GO111MODULE=off go get github.com/izumin5210/gex/cmd/gex
-	gex --build
+	go mod download
 
 PHONY: testcase
 testcase:
@@ -36,4 +35,4 @@ test:
 
 .PHONY: mock
 mock:
-	mockgen github.com/rerost/giro/domain/grpcreflectiface Client > mock/grpcreflectiface/client_test.go
+	go generate ./...
