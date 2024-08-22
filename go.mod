@@ -3,7 +3,7 @@ module github.com/rerost/giro
 go 1.22
 
 require (
-	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
+	github.com/bradleyjkemp/cupaloy v2.8.0+incompatible
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/wire v0.6.0
