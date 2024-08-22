@@ -16,13 +16,9 @@ protoc:
 	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc,paths=source_relative:. e2etest/dummyserver/echo.proto
 	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc:${GOPATH}/src rerost/giro/hosts.proto
 
-PHONY: generate-ci
-generate-ci: setup
-	go mod tidy
-	go generate ./...
-
 PHONY: generate
 generate: setup generate-ci testcase protoc
+	go generate ./...
 
 PHONY: build
 build: setup generate
@@ -32,7 +28,3 @@ build: setup generate
 PHONY: test
 test:
 	go test -v ./...
-
-.PHONY: mock
-mock:
-	go generate ./...
