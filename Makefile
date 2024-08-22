@@ -4,6 +4,7 @@ export PATH := ${BIN_DIR}:${PATH}
 PHONY: setup
 setup:
 	go mod download
+	go install google.golang.org/protobuf/cmd/protoc-gen-go
 
 PHONY: testcase
 testcase:
