@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/golang/protobuf v1.5.4
-	github.com/google/go-cmdtest v0.2.0
+	github.com/google/go-cmdtest v0.4.0
 	github.com/google/wire v0.6.0
 	github.com/jhump/protoreflect v1.16.0
 	github.com/pkg/errors v0.9.1
