@@ -2,6 +2,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/rerost/giro)](https://goreportcard.com/report/github.com/rerost/giro)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/rerost/giro)](http://github.com/rerost/giro/releases/latest)
 [![license](https://img.shields.io/github/license/rerost/giro.svg)](./LICENSE)
+[![codecov](https://codecov.io/gh/rerost/giro/graph/badge.svg?token=1C3JHYSTTB)](https://codecov.io/gh/rerost/giro)
 
 An alternative to [`grpc_cli`](https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md).
 giro can be used for gRPC servers without Server Reflection
