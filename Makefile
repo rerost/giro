@@ -17,7 +17,7 @@ protoc:
 	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc:${GOPATH}/src rerost/giro/hosts.proto
 
 PHONY: generate
-generate: setup generate-ci testcase protoc
+generate: setup testcase protoc
 	go generate ./...
 
 PHONY: build
