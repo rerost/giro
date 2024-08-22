@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
-	github.com/golang/protobuf v1.4.1
+	github.com/golang/protobuf v1.5.0
 	github.com/google/go-cmdtest v0.2.0
 	github.com/google/wire v0.6.0
 	github.com/jhump/protoreflect v1.7.0
@@ -16,13 +16,13 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/tools v0.17.0
 	google.golang.org/grpc v1.27.0
-	google.golang.org/protobuf v1.25.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
-	github.com/google/go-cmp v0.5.0 // indirect
+	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/google/renameio v0.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
