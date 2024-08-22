@@ -14,7 +14,7 @@ testcase:
 
 PHONY: protoc
 protoc: 
-	protoc -I=/usr/local/include/ -I=. --go-grpc_out=plugins=grpc,paths=source_relative:. e2etest/dummyserver/echo.proto
+	protoc -I=/usr/local/include/ -I=. --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative e2etest/dummyserver/echo.proto
 	protoc -I=/usr/local/include/ -I=. --go-grpc_out=plugins=grpc:${GOPATH}/src rerost/giro/hosts.proto
 
 PHONY: generate

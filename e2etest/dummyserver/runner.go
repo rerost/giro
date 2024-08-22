@@ -47,6 +47,8 @@ func (s *testServiceServerImpl) Echo(ctx context.Context, req *EchoRequest) (*Ec
 	}, nil
 }
 
+func (s *testServiceServerImpl) mustEmbedUnimplementedTestServiceServer() {}
+
 func NewHostsServiceServer() hosts_pb.HostServiceServer {
 	return &hostsServiceServerImpl{
 		hosts: map[string]string{
