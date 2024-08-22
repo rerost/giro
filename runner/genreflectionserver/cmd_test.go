@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/bradleyjkemp/cupaloy"
+	"github.com/bradleyjkemp/cupaloy/v2"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/runner/genreflectionserver"
