@@ -17,12 +17,13 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
-      id: go
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
-    - name: test
-      run: go test -v -coverprofile=covprofile ./...
+      id: go-test
+    - name: Test
+      run: go test -coverprofile=coverage.txt ./...
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
   build_giro:
     name: Build Giro
     runs-on: ubuntu-latest
