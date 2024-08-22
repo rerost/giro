@@ -4,6 +4,7 @@ export PATH := ${BIN_DIR}:${PATH}
 PHONY: setup
 setup:
 	go mod download
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
 PHONY: testcase
 testcase:
