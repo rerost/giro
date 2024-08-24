@@ -24,6 +24,8 @@ func NewHostsServiceServer() hosts_pb.HostServiceServer {
 }
 
 type hostsServiceServerImpl struct {
+	hosts_pb.UnimplementedHostServiceServer
+
 	hosts map[string]string
 }
 
