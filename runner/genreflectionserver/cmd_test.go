@@ -1,14 +1,14 @@
 package genreflectionserver_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/bradleyjkemp/cupaloy/v2"
-	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/runner/genreflectionserver"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -18,7 +18,7 @@ const (
 )
 
 func request(testset string) (*pluginpb.CodeGeneratorRequest, error) {
-	f, err := ioutil.ReadFile(filepath.Join(testData, testset))
+	f, err := os.ReadFile(filepath.Join(testData, testset))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -40,7 +40,7 @@ func request(testset string) (*pluginpb.CodeGeneratorRequest, error) {
 }
 
 func TestRun(t *testing.T) {
-	protos, err := ioutil.ReadDir(testData)
+	protos, err := os.ReadDir(testData)
 	if err != nil {
 		t.Error(err)
 		return
