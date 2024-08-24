@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 
-	hosts_pb "github.com/rerost/giro/pb/hosts"
+	hosts_pb "github.com/rerost/giro/rerost/giro"
 	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile "github.com/rerost/giro/runner/genreflectionserver/testdata/onefile"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
