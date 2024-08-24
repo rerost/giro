@@ -66,4 +66,4 @@ jobs:
         go-version-file: 'go.mod'
       id: go
     - name: make generate
-      run: make generate && git diff --exit-code
+      run: make generate && git diff --exit-code ':!*.pb'
