@@ -19,7 +19,9 @@ func Run(port string) (func(), error) {
 	return runServer(port)
 }
 
-type testServiceServerImpl struct{}
+type testServiceServerImpl struct {
+	UnimplementedTestServiceServer
+}
 
 func newTestService() TestServiceServer {
 	return &testServiceServerImpl{}
@@ -47,8 +49,6 @@ func (s *testServiceServerImpl) Echo(ctx context.Context, req *EchoRequest) (*Ec
 	}, nil
 }
 
-func (s *testServiceServerImpl) mustEmbedUnimplementedTestServiceServer() {}
-
 func NewHostsServiceServer() hosts_pb.HostServiceServer {
 	return &hostsServiceServerImpl{
 		hosts: map[string]string{
@@ -58,6 +58,8 @@ func NewHostsServiceServer() hosts_pb.HostServiceServer {
 }
 
 type hostsServiceServerImpl struct {
+	hosts_pb.UnimplementedHostServiceServer
+
 	hosts map[string]string
 }
 
@@ -72,8 +74,6 @@ func (s *hostsServiceServerImpl) GetHost(_ context.Context, req *hosts_pb.GetHos
 		Host: host,
 	}, nil
 }
-
-func (s *hostsServiceServerImpl) mustEmbedUnimplementedTestServiceServer() {}
 
 func runServer(port string) (func(), error) {
 	log.Printf("listen: %v\n", port)
