@@ -20,6 +20,7 @@ protoc:
 PHONY: generate
 generate: setup testcase protoc
 	go generate ./...
+	go mod tidy
 
 PHONY: build
 build: setup generate
