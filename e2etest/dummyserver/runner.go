@@ -73,6 +73,8 @@ func (s *hostsServiceServerImpl) GetHost(_ context.Context, req *hosts_pb.GetHos
 	}, nil
 }
 
+func (s *hostsServiceServerImpl) mustEmbedUnimplementedTestServiceServer() {}
+
 func runServer(port string) (func(), error) {
 	log.Printf("listen: %v\n", port)
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", port))
