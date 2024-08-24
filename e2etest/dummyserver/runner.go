@@ -7,7 +7,7 @@ import (
 	"net"
 
 	"github.com/pkg/errors"
-	hosts_pb "github.com/rerost/giro/pb/hosts"
+	hosts_pb "github.com/rerost/giro/rerost/giro"
 	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -19,7 +19,9 @@ func Run(port string) (func(), error) {
 	return runServer(port)
 }
 
-type testServiceServerImpl struct{}
+type testServiceServerImpl struct {
+	UnimplementedTestServiceServer
+}
 
 func newTestService() TestServiceServer {
 	return &testServiceServerImpl{}
@@ -56,6 +58,8 @@ func NewHostsServiceServer() hosts_pb.HostServiceServer {
 }
 
 type hostsServiceServerImpl struct {
+	hosts_pb.UnimplementedHostServiceServer
+
 	hosts map[string]string
 }
 

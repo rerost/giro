@@ -17,7 +17,7 @@ import (
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
 	"github.com/rerost/giro/domain/service"
-	"github.com/rerost/giro/pb/hosts"
+	"github.com/rerost/giro/rerost/giro"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"

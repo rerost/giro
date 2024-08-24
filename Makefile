@@ -13,16 +13,16 @@ testcase:
 
 PHONY: protoc
 protoc: 
-	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc,paths=source_relative:. e2etest/dummyserver/echo.proto
-	protoc -I=/usr/local/include/ -I=. --go_out=plugins=grpc:${GOPATH}/src rerost/giro/hosts.proto
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26.0
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
-PHONY: generate-ci
-generate-ci: setup
-	go mod tidy
-	go generate ./...
+	protoc -I=/usr/local/include/ -I=. --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative e2etest/dummyserver/echo.proto
+	protoc -I=/usr/local/include/ -I=. --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative rerost/giro/hosts.proto
 
 PHONY: generate
-generate: setup generate-ci testcase protoc
+generate: setup testcase protoc
+	go generate ./...
+	go mod tidy
 
 PHONY: build
 build: setup generate
@@ -32,7 +32,3 @@ build: setup generate
 PHONY: test
 test:
 	go test -v ./...
-
-.PHONY: mock
-mock:
-	go generate ./...

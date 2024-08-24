@@ -7,7 +7,7 @@ import (
 	"text/template"
 
 	"github.com/pkg/errors"
-	hosts_pb "github.com/rerost/giro/pb/hosts"
+	hosts_pb "github.com/rerost/giro/rerost/giro"
 	"golang.org/x/tools/imports"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -159,7 +159,7 @@ import (
   "os"
   "net"
 
-	hosts_pb "github.com/rerost/giro/pb/hosts"
+	hosts_pb "github.com/rerost/giro/rerost/giro"
   "google.golang.org/grpc"
   "google.golang.org/grpc/reflection"
   "google.golang.org/grpc/status"
@@ -185,6 +185,8 @@ func NewHostsServiceServer() hosts_pb.HostServiceServer {
 }
 
 type hostsServiceServerImpl struct {
+        hosts_pb.UnimplementedHostServiceServer
+
         hosts map[string]string
 }
 
