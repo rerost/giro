@@ -4,7 +4,6 @@ export PATH := ${BIN_DIR}:${PATH}
 PHONY: setup
 setup:
 	go mod download
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
 PHONY: testcase
 testcase:
@@ -14,6 +13,9 @@ testcase:
 
 PHONY: protoc
 protoc: 
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26.0
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+
 	protoc -I=/usr/local/include/ -I=. --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative e2etest/dummyserver/echo.proto
 	protoc -I=/usr/local/include/ -I=. --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative rerost/giro/hosts.proto
 
