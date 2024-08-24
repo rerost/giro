@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	hosts_pb "github.com/rerost/giro/rerost/giro/hosts"
+	hosts_pb "github.com/rerost/giro/rerost/giro"
 )
 
 type HostResolver interface {

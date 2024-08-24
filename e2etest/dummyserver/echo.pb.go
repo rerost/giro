@@ -7,7 +7,7 @@
 package dummyserver
 
 import (
-	_ "github.com/rerost/giro/rerost/giro/hosts"
+	_ "github.com/rerost/giro/rerost/giro"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
