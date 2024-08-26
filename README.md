@@ -8,24 +8,13 @@ An alternative to [`grpc_cli`](https://github.com/grpc/grpc/blob/master/doc/comm
 giro can be used for gRPC servers without Server Reflection
 
 ## Installation
-### macOS
 ```
 brew install rerost/tools/giro
 ```
 
-### Linux
-https://github.com/rerost/giro/releases
-
-
-## Tutorial
-```
-$ git clone https://github.com/rerost/giro.git giro
-$ cd giro/example/multiple_package
-```
-
 ### Create & Run reflection server
 ```
-$ protoc --go_out=plugins=grpc,paths=source_relative:.  --reflection-server_out=. $(find  . -name '*.proto')
+$ protoc --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative --reflection-server_out=. $(shell find  . -name '*.proto')
 $ go run main.go
 ```
 
