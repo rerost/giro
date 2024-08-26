@@ -39,4 +39,4 @@ jobs:
     - name: Install grpc_tools_ruby_protoc
       run: gem install grpc-tools
     - name: Check
-      run: make protoc && git diff --exit-code
+      run: cd example/multiple_package/ &&  make protoc && git diff --exit-code
