@@ -37,6 +37,6 @@ jobs:
       with:
         working-directory: example/multiple_package/
     - name: Install grpc_tools_ruby_protoc
-      run: gem install grpc_tools_ruby_protoc
+      run: gem install grpc-tools
     - name: Check
       run: make protoc && git diff --exit-code
