@@ -28,7 +28,7 @@ jobs:
         version: "27.x"
     - name: Checkout repository
       uses: actions/checkout@v4
-    - uses: ruby/setup-ruby@1
+    - uses: ruby/setup-ruby@v1
       with:
         working-directory: example/multiple_package/
     - name: Install grpc_tools_ruby_protoc
