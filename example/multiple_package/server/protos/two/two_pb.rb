@@ -3,6 +3,7 @@
 
 require 'google/protobuf'
 
+
 descriptor_data = "\n\x14protos/two/two.proto\x12#example.multiple_package.protos.two\"\x11\n\x0f\x42qvTestRequest1\"\x11\n\x0f\x42qvTestRequest2\"\x12\n\x10\x42qvTestResponse1\"\x12\n\x10\x42qvTestResponse22\x82\x02\n\nBqvService\x12y\n\x08\x42qvTest1\x12\x34.example.multiple_package.protos.two.BqvTestRequest1\x1a\x35.example.multiple_package.protos.two.BqvTestResponse1\"\x00\x12y\n\x08\x42qvTest2\x12\x34.example.multiple_package.protos.two.BqvTestRequest2\x1a\x35.example.multiple_package.protos.two.BqvTestResponse2\"\x00\x42\x43ZAgithub.com/rerost/giro/example/multiple_package/protos/two;two_pbb\x06proto3"
 
 pool = Google::Protobuf::DescriptorPool.generated_pool
