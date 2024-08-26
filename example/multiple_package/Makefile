@@ -3,8 +3,8 @@ setup:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26.0
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
-	go install github.com/rerost/giro/cmd/protoc-gen-reflection-server
-	go install github.com/rerost/giro/cmd/giro
+	go install ../../cmd/protoc-gen-reflection-server
+	go install ../../cmd/giro
 
 .PHONY: protoc
 protoc: setup
