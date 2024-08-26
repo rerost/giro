@@ -18,3 +18,20 @@ jobs:
     - name: Check
       run: |
         docker build -t test ./example/multiple_package/server
+  check_make_protoc:
+    runs-on: ubuntu-latest
+    name: Check Docker Build
+    steps:
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: "27.x"
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - uses: ruby/setup-ruby@1
+      with:
+        working-directory: example/multiple_package/
+    - name: Install grpc_tools_ruby_protoc
+      run: gem install grpc_tools_ruby_protoc
+    - name: Check
+      run: make protoc && git diff --exit-code
