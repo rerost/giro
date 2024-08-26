@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/rerost/giro/runner/genreflectionserver"
@@ -14,7 +14,7 @@ import (
 func main() {
 	flag.Parse()
 
-	in, err := ioutil.ReadAll(os.Stdin)
+	in, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		Error(err)
 	}

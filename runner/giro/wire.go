@@ -6,7 +6,7 @@ package giro
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -194,7 +194,7 @@ func ProviderToJSONCmd() ToJSONCmd {
 			if len(args) == 2 {
 				body = args[1]
 			} else {
-				b, err := ioutil.ReadAll(os.Stdin)
+				b, err := io.ReadAll(os.Stdin)
 				if err != nil {
 					return errors.WithStack(err)
 				}
@@ -229,7 +229,7 @@ func ProviderToBinaryCmd() ToBinaryCmd {
 			if len(args) == 2 {
 				body = args[1]
 			} else {
-				b, err := ioutil.ReadAll(os.Stdin)
+				b, err := io.ReadAll(os.Stdin)
 				if err != nil {
 					return errors.WithStack(err)
 				}
@@ -283,7 +283,7 @@ func ProviderCallCmd() CallCmd {
 			if len(args) == 2 {
 				body = args[1]
 			} else {
-				b, err := ioutil.ReadAll(os.Stdin)
+				b, err := io.ReadAll(os.Stdin)
 				if err != nil {
 					return errors.WithStack(err)
 				}
