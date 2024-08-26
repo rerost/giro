@@ -15,9 +15,14 @@ jobs:
       uses: docker/setup-buildx-action@v3
     - name: Checkout repository
       uses: actions/checkout@v4
-    - name: Check
-      run: |
-        docker build -t test ./example/multiple_package/server
+    - name: Build
+      uses: docker/build-push-action@v6
+      with:
+        context: ./example/multiple_package/server
+        push: false
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
   check_make_protoc:
     runs-on: ubuntu-latest
     name: Check Docker Build
