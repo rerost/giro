@@ -25,7 +25,7 @@ jobs:
 
   check_make_protoc:
     runs-on: ubuntu-latest
-    name: Check Docker Build
+    name: Check `make protoc`
     steps:
     - name: Install Protoc
       uses: arduino/setup-protoc@v3
