@@ -24,8 +24,8 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-  build_giro:
-    name: Build Giro
+  build:
+    name: Go Build
     runs-on: ubuntu-latest
     steps:
     - name: Check out code into the Go module directory
@@ -35,21 +35,8 @@ jobs:
       with:
         go-version-file: 'go.mod'
       id: go
-    - name: Build giro
-      run: go build ./cmd/giro
-  build_protoc_gen_reflection_server:
-    name: Build protoc-gen-reflection-server
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v4
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: 'go.mod'
-      id: go
-    - name: Build protoc-gen-reflection-server
-      run: go build ./cmd/protoc-gen-reflection-server
+    - name: Build
+      run: go build ./...
   check_generate:
     name: Check generate
     runs-on: ubuntu-latest

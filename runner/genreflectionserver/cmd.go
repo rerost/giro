@@ -159,7 +159,7 @@ import (
   "os"
   "net"
 
-	hosts_pb "github.com/rerost/giro/rerost/giro"
+  hosts_pb "github.com/rerost/giro/rerost/giro"
   "google.golang.org/grpc"
   "google.golang.org/grpc/reflection"
   "google.golang.org/grpc/status"
@@ -208,6 +208,7 @@ func New{{ $service.PackageName }}{{ $service.GoName }}() {{ $service.PackageNam
 }
 
 type {{ $service.StructName }} struct {
+        {{ $service.PackageName }}.Unimplemented{{ $service.GoName }}Server
 }
 
 {{ $structName := $service.StructName }}
