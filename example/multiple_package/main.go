@@ -46,6 +46,7 @@ func Newgithub_com_rerost_giro_example_multiple_package_protos_oneGiroService() 
 }
 
 type github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl struct {
+	github_com_rerost_giro_example_multiple_package_protos_one.UnimplementedGiroServiceServer
 }
 
 func (s *github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl) GiroTest1(ctx context.Context, req *github_com_rerost_giro_example_multiple_package_protos_one.GiroTestRequest1) (*github_com_rerost_giro_example_multiple_package_protos_one.GiroTestResponse1, error) {
@@ -61,6 +62,7 @@ func Newgithub_com_rerost_giro_example_multiple_package_protos_twoBqvService() g
 }
 
 type github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl struct {
+	github_com_rerost_giro_example_multiple_package_protos_two.UnimplementedBqvServiceServer
 }
 
 func (s *github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl) BqvTest1(ctx context.Context, req *github_com_rerost_giro_example_multiple_package_protos_two.BqvTestRequest1) (*github_com_rerost_giro_example_multiple_package_protos_two.BqvTestResponse1, error) {
