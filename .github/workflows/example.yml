@@ -17,4 +17,4 @@ jobs:
       uses: actions/checkout@v4
     - name: Check
       run: |
-        docker build -t test ./example/multiple_package
+        docker build -t test ./example/multiple_package/server
