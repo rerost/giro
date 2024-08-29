@@ -1,0 +1,40 @@
+name: protoc
+
+on: workflow_dispatch
+
+jobs:
+  protoc:
+    name: protoc
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: "27.x"
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+    - uses: ruby/setup-ruby@v1
+      with:
+        working-directory: example/multiple_package/
+    - name: Install grpc_tools_ruby_protoc
+      run: gem install grpc-tools
+    - name: protoc
+      run:
+        make protoc
+        cd example/multiple_package/ &&  make protoc
+    - name: commit
+      run:
+        git config user.name 'bot'
+        git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+        git checkout -b bot/update-protoc
+        git add .
+        git commit -m "Update protoc"
+        git push origin bot/update-protoc
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
