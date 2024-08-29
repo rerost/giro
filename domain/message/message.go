@@ -3,6 +3,7 @@ package message
 import (
 	"context"
 
+	//nolint:staticcheck
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/jhump/protoreflect/dynamic"
 	"github.com/pkg/errors"

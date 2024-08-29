@@ -11,6 +11,7 @@ import (
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -29,7 +30,6 @@ type serviceServiceImpl struct {
 	grpcreflectClient   grpcreflectiface.Client
 	messageService      message.MessageService
 	messageNameResolver messagename.MessageNameResolver
-	grpcClientOpts      []grpc.DialOption
 }
 
 func NewServiceService(grpcreflectClient grpcreflectiface.Client, hostResolver host.HostResolver, messageNameResolver messagename.MessageNameResolver, messageService message.MessageService) ServiceService {
@@ -63,6 +63,9 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 	}
 
 	responseDynamicMessage, err := ss.messageService.ToDynamicMessage(ctx, responseMessageName, message.JSON("{}"))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 
 	cctx := ctx
 	for k, v := range md {
@@ -136,7 +139,7 @@ func (ss *serviceServiceImpl) NewClient(ctx context.Context, serviceName string)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	conn, err := grpc.DialContext(ctx, string(target), grpc.WithInsecure())
+	conn, err := grpc.NewClient(string(target), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
