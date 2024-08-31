@@ -15,6 +15,10 @@ jobs:
       uses: docker/setup-buildx-action@v3
     - name: Checkout repository
       uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
     - name: Build
       uses: docker/build-push-action@v6
       with:
@@ -22,6 +26,12 @@ jobs:
         push: false
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        tags: test
+    - name: Run
+      run: |
+        docker run -d -p 5001:5001 test
+        go run cmd/giro/main.go ls > ls_result.txt
+        go run cmd/giro/main.go -rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
 
   check_make_protoc:
     runs-on: ubuntu-latest
