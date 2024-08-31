@@ -34,6 +34,8 @@ jobs:
         go run example/multiple_package/main.go & # Reflection Server
         go run cmd/giro/main.go ls > ls_result.txt
         go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        cat ls_result.txt
+        cat call_result.txt
 
   check_make_protoc:
     runs-on: ubuntu-latest
