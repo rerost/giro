@@ -27,6 +27,7 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         tags: test
+        load: true
     - name: Run
       run: |
         docker run -d -p 5001:5001 test
