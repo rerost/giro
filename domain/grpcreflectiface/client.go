@@ -3,8 +3,13 @@
 package grpcreflectiface
 
 import (
+	"context"
+	"io"
+
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/grpcreflect"
+	"github.com/pkg/errors"
+	"google.golang.org/grpc/reflection/grpc_reflection_v1"
 )
 
 type Client interface {
@@ -14,23 +19,58 @@ type Client interface {
 }
 
 type clientImpl struct {
-	rawClient *grpcreflect.Client
+	rawClient            grpc_reflection_v1.ServerReflectionClient
+	rawGrpcReflectClient *grpcreflect.Client
 }
 
-func NewClient(rawClient *grpcreflect.Client) Client {
+func NewClient(rawClient grpc_reflection_v1.ServerReflectionClient, rawGrpcReflectClient *grpcreflect.Client) Client {
 	return &clientImpl{
-		rawClient: rawClient,
+		rawClient:            rawClient,
+		rawGrpcReflectClient: rawGrpcReflectClient,
 	}
 }
 
 func (c *clientImpl) ListServices() ([]string, error) {
-	return c.rawClient.ListServices()
+	stream, err := c.rawClient.ServerReflectionInfo(context.TODO())
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	defer stream.CloseSend()
+
+	err = stream.Send(&grpc_reflection_v1.ServerReflectionRequest{
+		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_ListServices{
+			ListServices: "*",
+		},
+	})
+
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	services := []string{}
+	for {
+		response, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		recvServices := response.GetListServicesResponse().Service
+		for _, service := range recvServices {
+			services = append(services, service.GetName())
+		}
+	}
+
+	return services, nil
 }
 
 func (c *clientImpl) ResolveService(serviceName string) (*desc.ServiceDescriptor, error) {
-	return c.rawClient.ResolveService(serviceName)
+	return c.rawGrpcReflectClient.ResolveService(serviceName)
 }
 
 func (c *clientImpl) ResolveMessage(messageName string) (*desc.MessageDescriptor, error) {
-	return c.rawClient.ResolveMessage(messageName)
+	return c.rawGrpcReflectClient.ResolveMessage(messageName)
 }

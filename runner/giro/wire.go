@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection/grpc_reflection_v1"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 )
 
@@ -41,9 +42,12 @@ func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr)
 	return conn, nil
 }
 
-func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (*grpcreflect.Client, error) {
-	client := grpcreflect.NewClient(ctx, grpc_reflection_v1alpha.NewServerReflectionClient(conn))
+func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (grpc_reflection_v1.ServerReflectionClient, error) {
+	return grpc_reflection_v1.NewServerReflectionClient(conn), nil
+}
 
+func NewGrpcReflectClient(ctx context.Context, conn *grpc.ClientConn) (*grpcreflect.Client, error) {
+	client := grpcreflect.NewClient(ctx, grpc_reflection_v1alpha.NewServerReflectionClient(conn))
 	return client, nil
 }
 
@@ -446,6 +450,7 @@ var base = wire.NewSet(
 	NewServerReflectionClient,
 	grpcreflectiface.NewClient,
 	NewServerReflectionConn,
+	NewGrpcReflectClient,
 )
 
 func NewServiceService(context.Context, *pflag.FlagSet) (service.ServiceService, error) {
