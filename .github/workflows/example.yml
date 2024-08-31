@@ -33,7 +33,7 @@ jobs:
         docker run -d -p 5001:5001 test # RPC Server
         go run example/multiple_package/main.go & # Reflection Server
 
-        echo "Please set APP_PORT\nserver listening at [::]:5000\nexample.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
+        echo -e "Please set APP_PORT\nserver listening at [::]:5000\nexample.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
         go run cmd/giro/main.go ls > ls_result.txt
         diff ls_result.txt ls_expect.txt
 
