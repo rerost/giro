@@ -211,13 +211,6 @@ type {{ $service.StructName }} struct {
         {{ $service.PackageName }}.Unimplemented{{ $service.GoName }}Server
 }
 
-{{ $structName := $service.StructName }}
-{{- range $index, $method := $service.Methods}}
-func (s *{{ $structName }}) {{ $method.GoName }}(ctx context.Context, req *{{ PackageName $method.RequestTypeGoImportPath }}.{{ $method.RequestTypeName }}) (*{{ PackageName $method.ResponseTypeGoImportPath }}.{{ $method.ResponseTypeName }}, error) {
-  // TODO: Not yet implemented.
-  return nil, status.Error(codes.Unimplemented, "Dummy")
-}
-{{- end}}
 {{- end}}
 
 func main() {
