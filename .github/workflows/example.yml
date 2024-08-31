@@ -30,9 +30,10 @@ jobs:
         load: true
     - name: Run
       run: |
-        docker run -d -p 5001:5001 test
+        docker run -d -p 5001:5001 test # RPC Server
+        go run example/multiple_package/main.go & # Reflection Server
         go run cmd/giro/main.go ls > ls_result.txt
-        go run cmd/giro/main.go -rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        go run cmd/giro/main.go -rpc-server=localhost:5000 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
 
   check_make_protoc:
     runs-on: ubuntu-latest
