@@ -42,8 +42,15 @@ func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr)
 	return conn, nil
 }
 
-func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (grpc_reflection_v1.ServerReflectionClient, error) {
-	return grpc_reflection_v1.NewServerReflectionClient(conn), nil
+func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (grpcreflectiface.Stream, error) {
+	client := grpc_reflection_v1.NewServerReflectionClient(conn)
+
+	stream, err := client.ServerReflectionInfo(ctx)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return stream, nil
 }
 
 func NewGrpcReflectClient(ctx context.Context, conn *grpc.ClientConn) (*grpcreflect.Client, error) {
