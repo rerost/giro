@@ -4,7 +4,6 @@ package grpcreflectiface
 
 import (
 	"context"
-	"io"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/grpcreflect"
@@ -48,20 +47,14 @@ func (c *clientImpl) ListServices() ([]string, error) {
 	}
 
 	services := []string{}
-	for {
-		response, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
+	response, err := stream.Recv()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		recvServices := response.GetListServicesResponse().Service
-		for _, service := range recvServices {
-			services = append(services, service.GetName())
-		}
+	recvServices := response.GetListServicesResponse().Service
+	for _, service := range recvServices {
+		services = append(services, service.GetName())
 	}
 
 	return services, nil
