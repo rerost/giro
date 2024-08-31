@@ -49,29 +49,12 @@ type github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl s
 	github_com_rerost_giro_example_multiple_package_protos_one.UnimplementedGiroServiceServer
 }
 
-func (s *github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl) GiroTest1(ctx context.Context, req *github_com_rerost_giro_example_multiple_package_protos_one.GiroTestRequest1) (*github_com_rerost_giro_example_multiple_package_protos_one.GiroTestResponse1, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
-func (s *github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl) GiroTest2(ctx context.Context, req *github_com_rerost_giro_example_multiple_package_protos_one.GiroTestRequest2) (*github_com_rerost_giro_example_multiple_package_protos_one.GiroTestResponse2, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
 func Newgithub_com_rerost_giro_example_multiple_package_protos_twoBqvService() github_com_rerost_giro_example_multiple_package_protos_two.BqvServiceServer {
 	return &github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl{}
 }
 
 type github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl struct {
 	github_com_rerost_giro_example_multiple_package_protos_two.UnimplementedBqvServiceServer
-}
-
-func (s *github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl) BqvTest1(ctx context.Context, req *github_com_rerost_giro_example_multiple_package_protos_two.BqvTestRequest1) (*github_com_rerost_giro_example_multiple_package_protos_two.BqvTestResponse1, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
-func (s *github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl) BqvTest2(ctx context.Context, req *github_com_rerost_giro_example_multiple_package_protos_two.BqvTestRequest2) (*github_com_rerost_giro_example_multiple_package_protos_two.BqvTestResponse2, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
 }
 
 func main() {

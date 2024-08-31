@@ -51,25 +51,12 @@ type github_com_rerost_giro_rerost_giroHostServiceImpl struct {
 	github_com_rerost_giro_rerost_giro.UnimplementedHostServiceServer
 }
 
-func (s *github_com_rerost_giro_rerost_giroHostServiceImpl) GetHost(ctx context.Context, req *github_com_rerost_giro_rerost_giro.GetHostRequest) (*github_com_rerost_giro_rerost_giro.GetHostResponse, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
 func Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroService() github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.GiroServiceServer {
 	return &github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroServiceImpl{}
 }
 
 type github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroServiceImpl struct {
 	github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.UnimplementedGiroServiceServer
-}
-
-func (s *github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroServiceImpl) GiroTest1(ctx context.Context, req *github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.GiroTestRequest1) (*github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.GiroTestResponse1, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
-func (s *github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_optionGiroServiceImpl) GiroTest2(ctx context.Context, req *github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.GiroTestRequest2) (*github_com_rerost_giro_runner_genreflectionserver_testdata_with_host_option.GiroTestResponse2, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
 }
 
 func main() {

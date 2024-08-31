@@ -48,29 +48,12 @@ type github_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroServi
 	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedGiroServiceServer
 }
 
-func (s *github_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroServiceImpl) GiroTest1(ctx context.Context, req *github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.GiroTestRequest1) (*github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.GiroTestResponse1, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
-func (s *github_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroServiceImpl) GiroTest2(ctx context.Context, req *github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.GiroTestRequest2) (*github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.GiroTestResponse2, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
 func Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvService() github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.BqvServiceServer {
 	return &github_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvServiceImpl{}
 }
 
 type github_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvServiceImpl struct {
 	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedBqvServiceServer
-}
-
-func (s *github_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvServiceImpl) BqvTest1(ctx context.Context, req *github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.BqvTestRequest1) (*github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.BqvTestResponse1, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
-}
-func (s *github_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvServiceImpl) BqvTest2(ctx context.Context, req *github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.BqvTestRequest2) (*github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.BqvTestResponse2, error) {
-	// TODO: Not yet implemented.
-	return nil, status.Error(codes.Unimplemented, "Dummy")
 }
 
 func main() {
