@@ -22,7 +22,6 @@ type MessageService interface {
 	ToBinary(ctx context.Context, messageName messagename.MessageName, json JSON) (Binary, error)
 	// NOTE: For internal.
 	ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (protoiface.MessageV1, error)
-	DynamicMessageToJSON(ctx context.Context, dm *dynamic.Message) (JSON, error)
 }
 
 type messageServiceImpl struct {
@@ -127,13 +126,4 @@ func (ms messageServiceImpl) ToDynamicMessage(ctx context.Context, messageName m
 	}
 
 	return dMessage, nil
-}
-
-func (ms messageServiceImpl) DynamicMessageToJSON(ctx context.Context, dm *dynamic.Message) (JSON, error) {
-	json, err := dm.MarshalJSONPB(ms.jsonMarshaler)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return json, nil
 }
