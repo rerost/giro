@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/protoadapt"
 )
 
 type ServiceService interface {
@@ -84,7 +86,11 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 		return nil, errors.WithStack(err)
 	}
 
-	return ss.messageService.DynamicMessageToJSON(ctx, responseDynamicMessage)
+	res, err := protojson.Marshal(protoadapt.MessageV2Of(responseDynamicMessage))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return res, nil
 }
 
 func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, methodName *string) ([]Service, error) {

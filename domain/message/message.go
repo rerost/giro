@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/messagename"
+	"google.golang.org/protobuf/runtime/protoiface"
 )
 
 type JSON []byte
@@ -20,7 +21,7 @@ type MessageService interface {
 	ToJSON(ctx context.Context, messageName messagename.MessageName, binary Binary) (JSON, error)
 	ToBinary(ctx context.Context, messageName messagename.MessageName, json JSON) (Binary, error)
 	// NOTE: For internal.
-	ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (*dynamic.Message, error)
+	ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (protoiface.MessageV1, error)
 	DynamicMessageToJSON(ctx context.Context, dm *dynamic.Message) (JSON, error)
 }
 
@@ -112,7 +113,7 @@ func (ms messageServiceImpl) ToBinary(ctx context.Context, messageName messagena
 	return bin, nil
 }
 
-func (ms messageServiceImpl) ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (*dynamic.Message, error) {
+func (ms messageServiceImpl) ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (protoiface.MessageV1, error) {
 	md, err := ms.grpcreflectClient.ResolveMessage(string(messageName))
 	if err != nil {
 		return nil, errors.WithStack(err)
