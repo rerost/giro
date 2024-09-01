@@ -66,3 +66,15 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
+  check-goreleaser:
+    name: Check GoReleaser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
