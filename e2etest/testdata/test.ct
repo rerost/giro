@@ -9,6 +9,9 @@ grpc.reflection.v1alpha.ServerReflection
 rerost.giro.v1.HostService
 rerost.giro.v1.TestService
 
+$ giro ls rerost.giro.v1.TestService
+Echo
+
 $ giro host rerost.giro.v1.TestService
 localhost:5000
 
