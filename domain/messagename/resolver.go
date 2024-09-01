@@ -2,6 +2,7 @@ package messagename
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
@@ -34,6 +35,9 @@ func (mnr *messageNameResolverImpl) RequestMessageName(ctx context.Context, serv
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
+	if md == nil {
+		return "", fmt.Errorf("Method notfound, serviceName: %v, methodName: %v", serviceName, methodName)
+	}
 
 	return MessageName(md.Input().FullName()), nil
 }
@@ -51,6 +55,9 @@ func (mnr *messageNameResolverImpl) resolveMethodDescriptor(ctx context.Context,
 	sd, err := mnr.client.ResolveService(serviceName)
 	if err != nil {
 		return nil, errors.WithStack(err)
+	}
+	if sd == nil {
+		return nil, nil
 	}
 
 	md := sd.Methods().ByName(protoreflect.FullName(methodName).Name())

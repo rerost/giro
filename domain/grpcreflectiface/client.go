@@ -65,6 +65,9 @@ func (c *clientImpl) ResolveService(serviceName string) (protoreflect.ServiceDes
 	}
 
 	var svcDescriptor protoreflect.ServiceDescriptor
+	if resp.GetFileDescriptorResponse() == nil {
+		return nil, nil
+	}
 	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
 		var fdProto descriptorpb.FileDescriptorProto
 

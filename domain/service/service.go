@@ -110,6 +110,9 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
+		if sd == nil {
+			return []Service{svc}, nil
+		}
 
 		for i := 0; i < sd.Methods().Len(); i++ {
 			md := sd.Methods().Get(i)
