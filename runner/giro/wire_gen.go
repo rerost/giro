@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/wire"
-	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
@@ -24,7 +23,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
-	"google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 	"io"
 	"os"
 	"strings"
@@ -65,19 +63,15 @@ func NewServiceService(contextContext context.Context, flagSet *pflag.FlagSet) (
 	if err != nil {
 		return nil, err
 	}
-	client, err := NewGrpcReflectClient(contextContext, clientConn)
-	if err != nil {
-		return nil, err
-	}
-	grpcreflectifaceClient := grpcreflectiface.NewClient(bidiStreamingClient, client)
+	client := grpcreflectiface.NewClient(bidiStreamingClient)
 	rpcAddr := ProviderRPCAddr()
 	hostResolver, err := ProviderHostResolver(clientConn, rpcAddr)
 	if err != nil {
 		return nil, err
 	}
-	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
-	messageService := message.NewMessageService(grpcreflectifaceClient, messageNameResolver)
-	serviceService := service.NewServiceService(grpcreflectifaceClient, hostResolver, messageNameResolver, messageService)
+	messageNameResolver := messagename.NewMessageNameResolver(client)
+	messageService := message.NewMessageService(client, messageNameResolver)
+	serviceService := service.NewServiceService(client, hostResolver, messageNameResolver, messageService)
 	return serviceService, nil
 }
 
@@ -91,13 +85,9 @@ func NewMessageService(contextContext context.Context, flagSet *pflag.FlagSet) (
 	if err != nil {
 		return nil, err
 	}
-	client, err := NewGrpcReflectClient(contextContext, clientConn)
-	if err != nil {
-		return nil, err
-	}
-	grpcreflectifaceClient := grpcreflectiface.NewClient(bidiStreamingClient, client)
-	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
-	messageService := message.NewMessageService(grpcreflectifaceClient, messageNameResolver)
+	client := grpcreflectiface.NewClient(bidiStreamingClient)
+	messageNameResolver := messagename.NewMessageNameResolver(client)
+	messageService := message.NewMessageService(client, messageNameResolver)
 	return messageService, nil
 }
 
@@ -111,12 +101,8 @@ func NewMessageNameResolver(contextContext context.Context, flagSet *pflag.FlagS
 	if err != nil {
 		return nil, err
 	}
-	client, err := NewGrpcReflectClient(contextContext, clientConn)
-	if err != nil {
-		return nil, err
-	}
-	grpcreflectifaceClient := grpcreflectiface.NewClient(bidiStreamingClient, client)
-	messageNameResolver := messagename.NewMessageNameResolver(grpcreflectifaceClient)
+	client := grpcreflectiface.NewClient(bidiStreamingClient)
+	messageNameResolver := messagename.NewMessageNameResolver(client)
 	return messageNameResolver, nil
 }
 
@@ -160,11 +146,6 @@ func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (grpc
 	}
 
 	return stream, nil
-}
-
-func NewGrpcReflectClient(ctx context.Context, conn *grpc.ClientConn) (*grpcreflect.Client, error) {
-	client := grpcreflect.NewClient(ctx, grpc_reflection_v1alpha.NewServerReflectionClient(conn))
-	return client, nil
 }
 
 func ProviderReflectionAddr() ReflectionAddr {
@@ -537,6 +518,4 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 	return cmd, nil
 }
 
-var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient, grpcreflectiface.NewClient, NewServerReflectionConn,
-	NewGrpcReflectClient,
-)
+var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient, grpcreflectiface.NewClient, NewServerReflectionConn)

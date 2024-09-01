@@ -3,7 +3,6 @@ package grpcreflectiface
 import (
 	"sync"
 
-	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
@@ -24,16 +23,14 @@ type Client interface {
 type Stream = grpc.BidiStreamingClient[grpc_reflection_v1.ServerReflectionRequest, grpc_reflection_v1.ServerReflectionResponse]
 
 type clientImpl struct {
-	rawGrpcReflectClient *grpcreflect.Client
-	stream               Stream
+	stream Stream
 
 	streamLock sync.Mutex
 }
 
-func NewClient(stream Stream, rawGrpcReflectClient *grpcreflect.Client) Client {
+func NewClient(stream Stream) Client {
 	return &clientImpl{
-		rawGrpcReflectClient: rawGrpcReflectClient,
-		stream:               stream,
+		stream: stream,
 	}
 }
 
