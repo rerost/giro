@@ -6,7 +6,6 @@ require (
 	github.com/bradleyjkemp/cupaloy/v2 v2.8.0
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/wire v0.6.0
-	github.com/jhump/protoreflect v1.16.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
@@ -19,10 +18,8 @@ require (
 )
 
 require (
-	github.com/bufbuild/protocompile v0.10.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/renameio v0.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
