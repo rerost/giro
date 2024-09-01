@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
@@ -14,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
 )
 
 type ServiceService interface {

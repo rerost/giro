@@ -8,12 +8,18 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protodesc"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoregistry"
+	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/dynamicpb"
 )
 
 type Client interface {
 	ListServices() ([]string, error)
 	ResolveService(serviceName string) (*desc.ServiceDescriptor, error)
-	ResolveMessage(messageName string) (*desc.MessageDescriptor, error)
+	ResolveMessage(messageName string) (proto.Message, error)
 }
 
 type Stream = grpc.BidiStreamingClient[grpc_reflection_v1.ServerReflectionRequest, grpc_reflection_v1.ServerReflectionResponse]
@@ -54,8 +60,41 @@ func (c *clientImpl) ResolveService(serviceName string) (*desc.ServiceDescriptor
 	return c.rawGrpcReflectClient.ResolveService(serviceName)
 }
 
-func (c *clientImpl) ResolveMessage(messageName string) (*desc.MessageDescriptor, error) {
-	return c.rawGrpcReflectClient.ResolveMessage(messageName)
+func (c *clientImpl) ResolveMessage(messageName string) (proto.Message, error) {
+	req := grpc_reflection_v1.ServerReflectionRequest{
+		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileContainingSymbol{
+			FileContainingSymbol: messageName,
+		},
+	}
+
+	resp, err := c.call(&req)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	var dynamicMessage proto.Message
+	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
+		var fdProto descriptorpb.FileDescriptorProto
+
+		if err := proto.Unmarshal(fdProtoBytes, &fdProto); err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		file, err := protodesc.NewFile(&fdProto, protoregistry.GlobalFiles)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		msgDescriptor := file.Messages().ByName(protoreflect.FullName(messageName).Name())
+		if msgDescriptor == nil {
+			continue
+		}
+
+		// dynamicpbを使用してメッセージを動的に生成
+		dynamicMessage = dynamicpb.NewMessage(msgDescriptor)
+	}
+
+	return dynamicMessage, nil
 }
 
 func (c *clientImpl) call(request *grpc_reflection_v1.ServerReflectionRequest) (*grpc_reflection_v1.ServerReflectionResponse, error) {
