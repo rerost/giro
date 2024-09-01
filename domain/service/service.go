@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type ServiceService interface {
@@ -84,7 +85,12 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 		return nil, errors.WithStack(err)
 	}
 
-	return ss.messageService.DynamicMessageToJSON(ctx, responseDynamicMessage)
+	json, err := protojson.Marshal(responseDynamicMessage)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return json, nil
 }
 
 func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, methodName *string) ([]Service, error) {
@@ -104,9 +110,13 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
+		if sd == nil {
+			return []Service{svc}, nil
+		}
 
-		for _, md := range sd.GetMethods() {
-			svc.MethodNames = append(svc.MethodNames, md.GetName())
+		for i := 0; i < sd.Methods().Len(); i++ {
+			md := sd.Methods().Get(i)
+			svc.MethodNames = append(svc.MethodNames, string(md.Name()))
 		}
 
 		return []Service{svc}, nil
@@ -116,11 +126,14 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
+		if sd == nil {
+			return []Service{svc}, nil
+		}
 
-		for _, md := range sd.GetMethods() {
-			if *methodName == md.GetName() {
-				svc.MethodNames = append(svc.MethodNames, md.GetName())
-
+		for i := 0; i < sd.Methods().Len(); i++ {
+			md := sd.Methods().Get(i)
+			if *methodName == string(md.Name()) {
+				svc.MethodNames = append(svc.MethodNames, string(md.Name()))
 				return []Service{svc}, nil
 			}
 		}

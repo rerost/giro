@@ -1,34 +1,143 @@
 package grpcreflectiface
 
 import (
-	"github.com/jhump/protoreflect/desc"
-	"github.com/jhump/protoreflect/grpcreflect"
+	"sync"
+
+	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection/grpc_reflection_v1"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protodesc"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoregistry"
+	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/dynamicpb"
 )
 
 type Client interface {
 	ListServices() ([]string, error)
-	ResolveService(serviceName string) (*desc.ServiceDescriptor, error)
-	ResolveMessage(messageName string) (*desc.MessageDescriptor, error)
+	ResolveService(serviceName string) (protoreflect.ServiceDescriptor, error)
+	ResolveMessage(messageName string) (proto.Message, error)
 }
+
+type Stream = grpc.BidiStreamingClient[grpc_reflection_v1.ServerReflectionRequest, grpc_reflection_v1.ServerReflectionResponse]
 
 type clientImpl struct {
-	rawClient *grpcreflect.Client
+	stream Stream
+
+	streamLock sync.Mutex
 }
 
-func NewClient(rawClient *grpcreflect.Client) Client {
+func NewClient(stream Stream) Client {
 	return &clientImpl{
-		rawClient: rawClient,
+		stream: stream,
 	}
 }
 
 func (c *clientImpl) ListServices() ([]string, error) {
-	return c.rawClient.ListServices()
+	services := []string{}
+	res, err := c.call(&grpc_reflection_v1.ServerReflectionRequest{
+		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_ListServices{
+			ListServices: "*",
+		},
+	})
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	for _, service := range res.GetListServicesResponse().Service {
+		services = append(services, service.GetName())
+	}
+
+	return services, nil
 }
 
-func (c *clientImpl) ResolveService(serviceName string) (*desc.ServiceDescriptor, error) {
-	return c.rawClient.ResolveService(serviceName)
+func (c *clientImpl) ResolveService(serviceName string) (protoreflect.ServiceDescriptor, error) {
+	req := grpc_reflection_v1.ServerReflectionRequest{
+		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileContainingSymbol{
+			FileContainingSymbol: serviceName,
+		},
+	}
+
+	resp, err := c.call(&req)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	var svcDescriptor protoreflect.ServiceDescriptor
+	if resp.GetFileDescriptorResponse() == nil {
+		return nil, nil
+	}
+	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
+		var fdProto descriptorpb.FileDescriptorProto
+
+		if err := proto.Unmarshal(fdProtoBytes, &fdProto); err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		file, err := protodesc.NewFile(&fdProto, protoregistry.GlobalFiles)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		svcDescriptor = file.Services().ByName(protoreflect.FullName(serviceName).Name())
+		if svcDescriptor != nil {
+			break
+		}
+	}
+
+	return svcDescriptor, nil
 }
 
-func (c *clientImpl) ResolveMessage(messageName string) (*desc.MessageDescriptor, error) {
-	return c.rawClient.ResolveMessage(messageName)
+func (c *clientImpl) ResolveMessage(messageName string) (proto.Message, error) {
+	req := grpc_reflection_v1.ServerReflectionRequest{
+		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileContainingSymbol{
+			FileContainingSymbol: messageName,
+		},
+	}
+
+	resp, err := c.call(&req)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	var dynamicMessage proto.Message
+	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
+		var fdProto descriptorpb.FileDescriptorProto
+
+		if err := proto.Unmarshal(fdProtoBytes, &fdProto); err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		file, err := protodesc.NewFile(&fdProto, protoregistry.GlobalFiles)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		msgDescriptor := file.Messages().ByName(protoreflect.FullName(messageName).Name())
+		if msgDescriptor != nil {
+			dynamicMessage = dynamicpb.NewMessage(msgDescriptor)
+			break
+		}
+	}
+
+	return dynamicMessage, nil
+}
+
+func (c *clientImpl) call(request *grpc_reflection_v1.ServerReflectionRequest) (*grpc_reflection_v1.ServerReflectionResponse, error) {
+	c.streamLock.Lock()
+	defer c.streamLock.Unlock()
+
+	err := c.stream.Send(request)
+
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	response, err := c.stream.Recv()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return response, nil
 }

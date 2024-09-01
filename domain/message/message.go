@@ -3,12 +3,11 @@ package message
 import (
 	"context"
 
-	//nolint:staticcheck
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/jhump/protoreflect/dynamic"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/messagename"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 type JSON []byte
@@ -20,22 +19,21 @@ type MessageService interface {
 	ToJSON(ctx context.Context, messageName messagename.MessageName, binary Binary) (JSON, error)
 	ToBinary(ctx context.Context, messageName messagename.MessageName, json JSON) (Binary, error)
 	// NOTE: For internal.
-	ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (*dynamic.Message, error)
-	DynamicMessageToJSON(ctx context.Context, dm *dynamic.Message) (JSON, error)
+	ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (proto.Message, error)
 }
 
 type messageServiceImpl struct {
 	grpcreflectClient   grpcreflectiface.Client
 	messageNameResolver messagename.MessageNameResolver
-	jsonMarshaler       *jsonpb.Marshaler
+	jsonMarshaler       protojson.MarshalOptions
 }
 
 func NewMessageService(client grpcreflectiface.Client, messageNameResolver messagename.MessageNameResolver) MessageService {
 	return &messageServiceImpl{
 		grpcreflectClient:   client,
 		messageNameResolver: messageNameResolver,
-		jsonMarshaler: &jsonpb.Marshaler{
-			EmitDefaults: true,
+		jsonMarshaler: protojson.MarshalOptions{
+			EmitDefaultValues: true,
 		},
 	}
 }
@@ -46,9 +44,7 @@ func (ms messageServiceImpl) EmptyJSON(ctx context.Context, messageName messagen
 		return nil, errors.WithStack(err)
 	}
 
-	dMessage := dynamic.NewMessageFactoryWithDefaults().NewDynamicMessage(md)
-
-	json, err := dMessage.MarshalJSONPB(ms.jsonMarshaler)
+	json, err := ms.jsonMarshaler.Marshal(md)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -76,14 +72,7 @@ func (ms messageServiceImpl) ToJSON(ctx context.Context, messageName messagename
 		return nil, errors.WithStack(err)
 	}
 
-	dMessage := dynamic.NewMessageFactoryWithDefaults().NewDynamicMessage(md)
-
-	err = dMessage.Unmarshal(binary)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	json, err := dMessage.MarshalJSONPB(ms.jsonMarshaler)
+	json, err := ms.jsonMarshaler.Marshal(md)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -97,14 +86,7 @@ func (ms messageServiceImpl) ToBinary(ctx context.Context, messageName messagena
 		return nil, errors.WithStack(err)
 	}
 
-	dMessage := dynamic.NewMessageFactoryWithDefaults().NewDynamicMessage(md)
-
-	err = dMessage.UnmarshalJSON(json)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	bin, err := dMessage.Marshal()
+	bin, err := proto.Marshal(md)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -112,27 +94,15 @@ func (ms messageServiceImpl) ToBinary(ctx context.Context, messageName messagena
 	return bin, nil
 }
 
-func (ms messageServiceImpl) ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (*dynamic.Message, error) {
+func (ms messageServiceImpl) ToDynamicMessage(ctx context.Context, messageName messagename.MessageName, json JSON) (proto.Message, error) {
 	md, err := ms.grpcreflectClient.ResolveMessage(string(messageName))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	dMessage := dynamic.NewMessageFactoryWithDefaults().NewDynamicMessage(md)
-
-	err = dMessage.UnmarshalJSON(json)
-	if err != nil {
+	if err := protojson.Unmarshal(json, md); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	return dMessage, nil
-}
-
-func (ms messageServiceImpl) DynamicMessageToJSON(ctx context.Context, dm *dynamic.Message) (JSON, error) {
-	json, err := dm.MarshalJSONPB(ms.jsonMarshaler)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return json, nil
+	return md, nil
 }

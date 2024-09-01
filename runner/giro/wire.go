@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/google/wire"
-	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
@@ -25,7 +24,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
+	"google.golang.org/grpc/reflection/grpc_reflection_v1"
 )
 
 type ReflectionAddr string
@@ -41,10 +40,15 @@ func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr)
 	return conn, nil
 }
 
-func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (*grpcreflect.Client, error) {
-	client := grpcreflect.NewClient(ctx, grpc_reflection_v1alpha.NewServerReflectionClient(conn))
+func NewServerReflectionClient(ctx context.Context, conn *grpc.ClientConn) (grpcreflectiface.Stream, error) {
+	client := grpc_reflection_v1.NewServerReflectionClient(conn)
 
-	return client, nil
+	stream, err := client.ServerReflectionInfo(ctx)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return stream, nil
 }
 
 func ProviderReflectionAddr() ReflectionAddr {

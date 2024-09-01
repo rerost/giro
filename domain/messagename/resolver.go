@@ -2,10 +2,11 @@ package messagename
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/jhump/protoreflect/desc"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 type MessageName string
@@ -34,9 +35,11 @@ func (mnr *messageNameResolverImpl) RequestMessageName(ctx context.Context, serv
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
+	if md == nil {
+		return "", fmt.Errorf("Method notfound, serviceName: %v, methodName: %v", serviceName, methodName)
+	}
 
-	messageDescriptor := md.GetInputType()
-	return MessageName(messageDescriptor.GetFullyQualifiedName()), nil
+	return MessageName(md.Input().FullName()), nil
 }
 
 func (mnr *messageNameResolverImpl) ResponseMessageName(ctx context.Context, serviceName string, methodName string) (MessageName, error) {
@@ -45,17 +48,19 @@ func (mnr *messageNameResolverImpl) ResponseMessageName(ctx context.Context, ser
 		return "", errors.WithStack(err)
 	}
 
-	messageDescriptor := md.GetOutputType()
-	return MessageName(messageDescriptor.GetFullyQualifiedName()), nil
+	return MessageName(md.Output().FullName()), nil
 }
 
-func (mnr *messageNameResolverImpl) resolveMethodDescriptor(ctx context.Context, serviceName string, methodName string) (*desc.MethodDescriptor, error) {
+func (mnr *messageNameResolverImpl) resolveMethodDescriptor(ctx context.Context, serviceName string, methodName string) (protoreflect.MethodDescriptor, error) {
 	sd, err := mnr.client.ResolveService(serviceName)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	if sd == nil {
+		return nil, nil
+	}
 
-	md := sd.FindMethodByName(methodName)
+	md := sd.Methods().ByName(protoreflect.FullName(methodName).Name())
 	if md == nil {
 		return nil, errors.WithStack(MethodNotFoundError)
 	}
