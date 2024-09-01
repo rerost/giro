@@ -3,7 +3,6 @@ package grpcreflectiface
 import (
 	"sync"
 
-	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -18,7 +17,7 @@ import (
 
 type Client interface {
 	ListServices() ([]string, error)
-	ResolveService(serviceName string) (*desc.ServiceDescriptor, error)
+	ResolveService(serviceName string) (protoreflect.ServiceDescriptor, error)
 	ResolveMessage(messageName string) (proto.Message, error)
 }
 
@@ -56,8 +55,38 @@ func (c *clientImpl) ListServices() ([]string, error) {
 	return services, nil
 }
 
-func (c *clientImpl) ResolveService(serviceName string) (*desc.ServiceDescriptor, error) {
-	return c.rawGrpcReflectClient.ResolveService(serviceName)
+func (c *clientImpl) ResolveService(serviceName string) (protoreflect.ServiceDescriptor, error) {
+	req := grpc_reflection_v1.ServerReflectionRequest{
+		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileContainingSymbol{
+			FileContainingSymbol: serviceName,
+		},
+	}
+
+	resp, err := c.call(&req)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	var svcDescriptor protoreflect.ServiceDescriptor
+	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
+		var fdProto descriptorpb.FileDescriptorProto
+
+		if err := proto.Unmarshal(fdProtoBytes, &fdProto); err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		file, err := protodesc.NewFile(&fdProto, protoregistry.GlobalFiles)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		svcDescriptor = file.Services().ByName(protoreflect.FullName(serviceName).Name())
+		if svcDescriptor == nil {
+			continue
+		}
+	}
+
+	return svcDescriptor, nil
 }
 
 func (c *clientImpl) ResolveMessage(messageName string) (proto.Message, error) {

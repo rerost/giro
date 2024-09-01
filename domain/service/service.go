@@ -111,8 +111,9 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 			return nil, errors.WithStack(err)
 		}
 
-		for _, md := range sd.GetMethods() {
-			svc.MethodNames = append(svc.MethodNames, md.GetName())
+		for i := 0; i < sd.Methods().Len(); i++ {
+			md := sd.Methods().Get(i)
+			svc.MethodNames = append(svc.MethodNames, string(md.Name()))
 		}
 
 		return []Service{svc}, nil
@@ -123,10 +124,10 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 			return nil, errors.WithStack(err)
 		}
 
-		for _, md := range sd.GetMethods() {
-			if *methodName == md.GetName() {
-				svc.MethodNames = append(svc.MethodNames, md.GetName())
-
+		for i := 0; i < sd.Methods().Len(); i++ {
+			md := sd.Methods().Get(i)
+			if *methodName == string(md.Name()) {
+				svc.MethodNames = append(svc.MethodNames, string(md.FullName()))
 				return []Service{svc}, nil
 			}
 		}
