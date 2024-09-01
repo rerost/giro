@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
 	"io"
 	"os"
@@ -129,7 +130,7 @@ type RPCAddr string
 type Metadata map[string]string
 
 func NewServerReflectionConn(ctx context.Context, reflectionAddr ReflectionAddr) (*grpc.ClientConn, error) {
-	conn, err := grpc.DialContext(ctx, string(reflectionAddr), grpc.WithInsecure())
+	conn, err := grpc.NewClient(string(reflectionAddr), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
