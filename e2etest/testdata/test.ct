@@ -12,6 +12,9 @@ rerost.giro.v1.TestService
 $ giro ls rerost.giro.v1.TestService
 Echo
 
+$ giro ls rerost.giro.v1.TestService/Echo
+Echo
+
 $ giro host rerost.giro.v1.TestService
 localhost:5000
 
