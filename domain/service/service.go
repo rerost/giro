@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/rerost/giro/domain/grpcreflectiface"
 	"github.com/rerost/giro/domain/host"
@@ -13,8 +14,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/protoadapt"
 )
 
 type ServiceService interface {
@@ -85,12 +84,16 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-
-	res, err := protojson.Marshal(protoadapt.MessageV2Of(responseDynamicMessage))
+	marshaled, err := proto.Marshal(requestDynamicMessage)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return res, nil
+	json, err := ss.messageService.ToJSON(ctx, requestMessageName, message.Binary(marshaled))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return json, nil
 }
 
 func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, methodName *string) ([]Service, error) {
