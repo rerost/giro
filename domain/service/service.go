@@ -130,7 +130,7 @@ func (ss *serviceServiceImpl) Ls(ctx context.Context, serviceName *string, metho
 		for i := 0; i < sd.Methods().Len(); i++ {
 			md := sd.Methods().Get(i)
 			if *methodName == string(md.Name()) {
-				svc.MethodNames = append(svc.MethodNames, string(md.FullName()))
+				svc.MethodNames = append(svc.MethodNames, string(md.Name()))
 				return []Service{svc}, nil
 			}
 		}
