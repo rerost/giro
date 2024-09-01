@@ -81,8 +81,8 @@ func (c *clientImpl) ResolveService(serviceName string) (protoreflect.ServiceDes
 		}
 
 		svcDescriptor = file.Services().ByName(protoreflect.FullName(serviceName).Name())
-		if svcDescriptor == nil {
-			continue
+		if svcDescriptor != nil {
+			break
 		}
 	}
 
@@ -115,12 +115,10 @@ func (c *clientImpl) ResolveMessage(messageName string) (proto.Message, error) {
 		}
 
 		msgDescriptor := file.Messages().ByName(protoreflect.FullName(messageName).Name())
-		if msgDescriptor == nil {
-			continue
+		if msgDescriptor != nil {
+			dynamicMessage = dynamicpb.NewMessage(msgDescriptor)
+			break
 		}
-
-		// dynamicpbを使用してメッセージを動的に生成
-		dynamicMessage = dynamicpb.NewMessage(msgDescriptor)
 	}
 
 	return dynamicMessage, nil
