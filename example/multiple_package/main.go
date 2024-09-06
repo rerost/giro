@@ -41,20 +41,20 @@ func (s *hostsServiceServerImpl) GetHost(_ context.Context, req *hosts_pb.GetHos
 		Host: host,
 	}, nil
 }
-func Newgithub_com_rerost_giro_example_multiple_package_protos_oneGiroService() github_com_rerost_giro_example_multiple_package_protos_one.GiroServiceServer {
-	return &github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl{}
-}
-
-type github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl struct {
-	github_com_rerost_giro_example_multiple_package_protos_one.UnimplementedGiroServiceServer
-}
-
 func Newgithub_com_rerost_giro_example_multiple_package_protos_twoBqvService() github_com_rerost_giro_example_multiple_package_protos_two.BqvServiceServer {
 	return &github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl{}
 }
 
 type github_com_rerost_giro_example_multiple_package_protos_twoBqvServiceImpl struct {
 	github_com_rerost_giro_example_multiple_package_protos_two.UnimplementedBqvServiceServer
+}
+
+func Newgithub_com_rerost_giro_example_multiple_package_protos_oneGiroService() github_com_rerost_giro_example_multiple_package_protos_one.GiroServiceServer {
+	return &github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl{}
+}
+
+type github_com_rerost_giro_example_multiple_package_protos_oneGiroServiceImpl struct {
+	github_com_rerost_giro_example_multiple_package_protos_one.UnimplementedGiroServiceServer
 }
 
 func main() {
@@ -71,8 +71,8 @@ func main() {
 
 	server := grpc.NewServer()
 	healthpb.RegisterHealthServer(server, health.NewServer())
-	github_com_rerost_giro_example_multiple_package_protos_one.RegisterGiroServiceServer(server, Newgithub_com_rerost_giro_example_multiple_package_protos_oneGiroService())
 	github_com_rerost_giro_example_multiple_package_protos_two.RegisterBqvServiceServer(server, Newgithub_com_rerost_giro_example_multiple_package_protos_twoBqvService())
+	github_com_rerost_giro_example_multiple_package_protos_one.RegisterGiroServiceServer(server, Newgithub_com_rerost_giro_example_multiple_package_protos_oneGiroService())
 	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
 	reflection.Register(server)
 
