@@ -3,6 +3,7 @@ package genreflectionserver
 import (
 	"bytes"
 	"go/format"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -130,6 +131,11 @@ func (r *ReflectionServerFile) Content() (string, error) {
 		goImportPath = append(goImportPath, v)
 	}
 
+	slices.Sort(goImportPath)
+	slices.SortFunc(r.ServiceRegistry, func(a, b Service) int {
+		return strings.Compare(a.FullName, b.FullName)
+	})
+
 	buf := bytes.NewBuffer([]byte(""))
 	err := mainTemplate.Execute(buf, ReflectionServerFileData{Services: r.ServiceRegistry, GoImportPath: goImportPath})
 	if err != nil {
@@ -202,17 +208,6 @@ func (s *hostsServiceServerImpl) GetHost(_ context.Context, req *hosts_pb.GetHos
         }, nil
 }
 
-{{- range $index, $service := .Services}}
-func New{{ $service.PackageName }}{{ $service.GoName }}() {{ $service.PackageName }}.{{ $service.GoName }}Server {
-        return &{{ $service.StructName }}{}
-}
-
-type {{ $service.StructName }} struct {
-        {{ $service.PackageName }}.Unimplemented{{ $service.GoName }}Server
-}
-
-{{- end}}
-
 func main() {
   port := os.Getenv("APP_PORT")
   if port == "" {
@@ -229,7 +224,7 @@ func main() {
   healthpb.RegisterHealthServer(server, health.NewServer())
   {{- range $index, $service := .Services }}
   {{- if ne $service.PackageName "github_com_rerost_giro_pb_hosts" }}
-  {{ $service.PackageName }}.Register{{$service.GoName}}Server(server, New{{ $service.PackageName }}{{ $service.GoName }}())
+  {{ $service.PackageName }}.Register{{$service.GoName}}Server(server, {{ $service.PackageName }}.Unimplemented{{ $service.GoName }}Server{})
   {{- end }}
   {{- end }}
 	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
