@@ -40,21 +40,6 @@ func (s *hostsServiceServerImpl) GetHost(_ context.Context, req *hosts_pb.GetHos
 		Host: host,
 	}, nil
 }
-func Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroService() github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.GiroServiceServer {
-	return &github_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroServiceImpl{}
-}
-
-type github_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroServiceImpl struct {
-	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedGiroServiceServer
-}
-
-func Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvService() github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.BqvServiceServer {
-	return &github_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvServiceImpl{}
-}
-
-type github_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvServiceImpl struct {
-	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedBqvServiceServer
-}
 
 func main() {
 	port := os.Getenv("APP_PORT")
@@ -70,8 +55,8 @@ func main() {
 
 	server := grpc.NewServer()
 	healthpb.RegisterHealthServer(server, health.NewServer())
-	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterGiroServiceServer(server, Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileGiroService())
-	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterBqvServiceServer(server, Newgithub_com_rerost_giro_runner_genreflectionserver_testdata_onefileBqvService())
+	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterGiroServiceServer(server, github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedGiroServiceServer{})
+	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterBqvServiceServer(server, github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedBqvServiceServer{})
 	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
 	reflection.Register(server)
 
