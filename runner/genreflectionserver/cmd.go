@@ -3,6 +3,7 @@ package genreflectionserver
 import (
 	"bytes"
 	"go/format"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -129,6 +130,11 @@ func (r *ReflectionServerFile) Content() (string, error) {
 		uniq[v] = true
 		goImportPath = append(goImportPath, v)
 	}
+
+	slices.Sort(goImportPath)
+	slices.SortFunc(r.ServiceRegistry, func(a, b Service) int {
+		return strings.Compare(a.FullName, b.FullName)
+	})
 
 	buf := bytes.NewBuffer([]byte(""))
 	err := mainTemplate.Execute(buf, ReflectionServerFileData{Services: r.ServiceRegistry, GoImportPath: goImportPath})
