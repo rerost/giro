@@ -55,8 +55,8 @@ func main() {
 
 	server := grpc.NewServer()
 	healthpb.RegisterHealthServer(server, health.NewServer())
-	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterGiroServiceServer(server, github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedGiroServiceServer{})
 	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterBqvServiceServer(server, github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedBqvServiceServer{})
+	github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.RegisterGiroServiceServer(server, github_com_rerost_giro_runner_genreflectionserver_testdata_onefile.UnimplementedGiroServiceServer{})
 	hosts_pb.RegisterHostServiceServer(server, NewHostsServiceServer())
 	reflection.Register(server)
 
