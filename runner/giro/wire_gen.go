@@ -60,11 +60,11 @@ func NewServiceService(contextContext context.Context, flagSet *pflag.FlagSet) (
 	if err != nil {
 		return nil, err
 	}
-	bidiStreamingClient, err := NewServerReflectionClient(contextContext, clientConn)
+	v, err := NewServerReflectionClient(contextContext, clientConn)
 	if err != nil {
 		return nil, err
 	}
-	client := grpcreflectiface.NewClient(bidiStreamingClient)
+	client := grpcreflectiface.NewClient(v)
 	rpcAddr := ProviderRPCAddr()
 	hostResolver, err := ProviderHostResolver(clientConn, rpcAddr)
 	if err != nil {
@@ -82,11 +82,11 @@ func NewMessageService(contextContext context.Context, flagSet *pflag.FlagSet) (
 	if err != nil {
 		return nil, err
 	}
-	bidiStreamingClient, err := NewServerReflectionClient(contextContext, clientConn)
+	v, err := NewServerReflectionClient(contextContext, clientConn)
 	if err != nil {
 		return nil, err
 	}
-	client := grpcreflectiface.NewClient(bidiStreamingClient)
+	client := grpcreflectiface.NewClient(v)
 	messageNameResolver := messagename.NewMessageNameResolver(client)
 	messageService := message.NewMessageService(client, messageNameResolver)
 	return messageService, nil
@@ -98,11 +98,11 @@ func NewMessageNameResolver(contextContext context.Context, flagSet *pflag.FlagS
 	if err != nil {
 		return nil, err
 	}
-	bidiStreamingClient, err := NewServerReflectionClient(contextContext, clientConn)
+	v, err := NewServerReflectionClient(contextContext, clientConn)
 	if err != nil {
 		return nil, err
 	}
-	client := grpcreflectiface.NewClient(bidiStreamingClient)
+	client := grpcreflectiface.NewClient(v)
 	messageNameResolver := messagename.NewMessageNameResolver(client)
 	return messageNameResolver, nil
 }
