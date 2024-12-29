@@ -20,4 +20,4 @@ DEPENDENCIES
   grpc (~> 1.34)
 
 BUNDLED WITH
-   2.1.4
+   2.6.2
