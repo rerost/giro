@@ -5,9 +5,9 @@ GEM
     google-protobuf (4.29.3)
       bigdecimal
       rake (>= 13)
-    googleapis-common-protos-types (1.16.0)
+    googleapis-common-protos-types (1.17.0)
       google-protobuf (>= 3.18, < 5.a)
-    grpc (1.68.1)
+    grpc (1.69.0)
       google-protobuf (>= 3.25, < 5.0)
       googleapis-common-protos-types (~> 1.0)
     rake (13.2.1)
