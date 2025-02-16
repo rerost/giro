@@ -1,6 +1,7 @@
 package e2etest_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -23,11 +24,28 @@ func GiroCmd() int {
 	}
 	defer closer()
 
-	if err := giro.Run("test", "test"); err != nil {
+	// Pass arguments explicitly
+	// See https://github.com/spf13/cobra/pull/2173
+	giroFunc := func() error {
+		ctx := context.Background()
+		cmd, err := giro.NewCmdRoot(ctx, "test", "test")
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		cmd.SetArgs(os.Args[1:])
+
+		if err := cmd.Execute(); err != nil {
+			return errors.WithStack(err)
+		}
+
+		return nil
+	}
+
+	if err := giroFunc(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
-
 	return 0
 }
 
