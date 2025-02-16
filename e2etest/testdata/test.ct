@@ -5,6 +5,7 @@
 $ setenv REFLECTION_SERVER localhost:5000
 
 $ giro ls
+grpc.reflection.v1.ServerReflection
 grpc.reflection.v1alpha.ServerReflection
 rerost.giro.v1.HostService
 rerost.giro.v1.TestService
@@ -19,20 +20,21 @@ $ giro host rerost.giro.v1.TestService
 localhost:5000
 
 $ giro call rerost.giro.v1.TestService/Echo {"message":"Test"} --metadata=key1:val1:key2:val2
-{"message":"Test","metadata":{"metadata":{":authority":{"value":["localhost:5000"]},"content-type":{"value":["application/grpc"]},"key1":{"value":["val1"]},"key2":{"value":["val2"]},"user-agent":{"value":["grpc-go/1.27.0"]}}}}
+{"message":"Test", "metadata":{"metadata":{":authority":{"value":["localhost:5000"]}, "content-type":{"value":["application/grpc"]}, "key1":{"value":["val1"]}, "key2":{"value":["val2"]}, "user-agent":{"value":["grpc-go/1.70.0"]}}}}
 
 $ giro empty_json rerost.giro.v1.EchoRequest
 {"message":""}
 
 # Typo service
 $ giro call rerost.giro.v1.TypoService/Echo '{}' --rpc-server=localhost:5000 --> FAIL
-Error: Service not found: rerost.giro.v1.TypoService
+Error: Method notfound, serviceName: rerost.giro.v1.TypoService, methodName: Echo
 Usage:
   giro call <method> [message_body] [flags]
 
 Flags:
-  -h, --help              help for call
-  -m, --metadata string   metadata. e.g key1:val1:key2:val2
+  -t, --call-timeout int   call timeout seconds
+  -h, --help               help for call
+  -m, --metadata string    metadata. e.g key1:val1:key2:val2
 
 Global Flags:
       --debug                      
@@ -40,7 +42,7 @@ Global Flags:
       --rpc-server string          
       --verbose
 
-Service not found: rerost.giro.v1.TypoService
+Method notfound, serviceName: rerost.giro.v1.TypoService, methodName: Echo
 
 # Typo method
 $ giro call rerost.giro.v1.TestService/Typo '{}' --rpc-server=localhost:5000 --> FAIL
@@ -49,8 +51,9 @@ Usage:
   giro call <method> [message_body] [flags]
 
 Flags:
-  -h, --help              help for call
-  -m, --metadata string   metadata. e.g key1:val1:key2:val2
+  -t, --call-timeout int   call timeout seconds
+  -h, --help               help for call
+  -m, --metadata string    metadata. e.g key1:val1:key2:val2
 
 Global Flags:
       --debug                      

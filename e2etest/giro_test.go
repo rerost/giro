@@ -1,6 +1,8 @@
 package e2etest_test
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"os"
 	"testing"
@@ -23,11 +25,28 @@ func GiroCmd() int {
 	}
 	defer closer()
 
-	if err := giro.Run("test", "test"); err != nil {
+	// Pass arguments explicitly
+	// See https://github.com/spf13/cobra/pull/2173
+	giroFunc := func() error {
+		ctx := context.Background()
+		cmd, err := giro.NewCmdRoot(ctx, "test", "test")
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		cmd.SetArgs(os.Args[1:])
+
+		if err := cmd.Execute(); err != nil {
+			return errors.WithStack(err)
+		}
+
+		return nil
+	}
+
+	if err := giroFunc(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
-
 	return 0
 }
 
@@ -41,6 +60,8 @@ func startServer() (string, func(), error) {
 	return fmt.Sprintf("%v", port), closer, nil
 }
 
+var update = flag.Bool("update", false, "update test files with results")
+
 func TestGiro(t *testing.T) {
 	ts, err := cmdtest.Read("testdata")
 	if err != nil {
@@ -48,5 +69,5 @@ func TestGiro(t *testing.T) {
 	}
 
 	ts.Commands["giro"] = cmdtest.InProcessProgram("giro", GiroCmd)
-	ts.Run(t, true)
+	ts.Run(t, *update)
 }
