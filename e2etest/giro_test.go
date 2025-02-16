@@ -2,6 +2,7 @@ package e2etest_test
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"testing"
@@ -59,6 +60,8 @@ func startServer() (string, func(), error) {
 	return fmt.Sprintf("%v", port), closer, nil
 }
 
+var update = flag.Bool("update", false, "update test files with results")
+
 func TestGiro(t *testing.T) {
 	ts, err := cmdtest.Read("testdata")
 	if err != nil {
@@ -66,5 +69,5 @@ func TestGiro(t *testing.T) {
 	}
 
 	ts.Commands["giro"] = cmdtest.InProcessProgram("giro", GiroCmd)
-	ts.Run(t, true)
+	ts.Run(t, *update)
 }
