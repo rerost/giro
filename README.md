@@ -38,3 +38,9 @@ rerost.giro.v1.HostService
 $ giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}'
 {"message":"test"}
 ```
+
+## Develop
+### Update snapshot
+```
+$ go test e2etest/giro_test.go -update
+```
