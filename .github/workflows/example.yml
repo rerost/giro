@@ -46,6 +46,12 @@ jobs:
         build-args: |
           BUILDKIT_STEP_LOG_MAX_SIZE=10485760
           BUILDKIT_STEP_LOG_MAX_SPEED=10485760
+    - name: Upload Docker image
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image
+        path: /tmp/image.tar
+        retention-days: 1
 
   test_services:
     needs: docker_build
