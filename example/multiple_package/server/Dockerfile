@@ -17,13 +17,13 @@ COPY Gemfile Gemfile.lock ./
 
 # Install gems with proper native extension support
 RUN --mount=type=cache,target=/usr/local/bundle \
-    bundle config set --local build.google-protobuf --with-cflags="-fPIC" && \
-    bundle install --jobs 4
+    bundle config set --local without 'development test' && \
+    bundle install --jobs 4 --retry 3
 
 # Copy application files
 COPY . .
 
-# Verify protobuf installation
-RUN ruby -e "require 'google/protobuf'" || exit 1
+# Verify protobuf installation and precompile native extensions
+RUN bundle exec ruby -e "require 'google/protobuf'; require 'grpc'" || exit 1
 
-CMD ["ruby", "server.rb"]
+CMD ["bundle", "exec", "ruby", "server.rb"]
