@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -85,7 +86,18 @@ func (ss *serviceServiceImpl) Call(ctx context.Context, serviceName string, meth
 		return nil, errors.WithStack(err)
 	}
 
-	json, err := protojson.Marshal(responseDynamicMessage)
+	// Add spaces between JSON elements
+	jsonBytes, err := protojson.MarshalOptions{
+		EmitDefaultValues: true,
+	}.Marshal(responseDynamicMessage)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	
+	// Insert spaces between JSON elements to match expected format
+	jsonStr := string(jsonBytes)
+	jsonStr = strings.ReplaceAll(jsonStr, ",\"", ", \"")
+	json := []byte(jsonStr)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
