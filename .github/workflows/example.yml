@@ -15,41 +15,25 @@ jobs:
       uses: actions/checkout@v4
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-      with:
-        driver: docker-container
-        driver-opts: |
-          image=moby/buildkit:latest
-          network=host
-        buildkitd-flags: |
-          --allow-insecure-entitlement network.host
-        buildkitd-config-inline: |
-          [worker.oci]
-          max-parallelism=4
-          [worker.containerd]
-          max-parallelism=4
-          gc=false
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
     - name: Build and Test
       run: |
-        # Build with optimized BuildKit settings
+        # Build with minimal cache configuration
         docker build \
-          --cache-from type=gha,scope=master \
           --cache-from type=gha,scope=${{ github.ref_name }} \
           --cache-to type=gha,mode=max,scope=${{ github.ref_name }} \
           -t test \
           ./example/multiple_package/server
 
-        # Start services with health check
+        # Start services
         docker run -d -p 5001:5001 test
         go run example/multiple_package/main.go &
-        
-        # Wait for gRPC service to be ready
-        timeout 10s bash -c 'until nc -z localhost 5001; do sleep 0.1; done'
+        sleep 2
 
-        # Run tests
+        # Run tests sequentially
         echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
         go run cmd/giro/main.go ls > ls_result.txt
         diff ls_result.txt ls_expect.txt
