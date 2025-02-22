@@ -9,11 +9,7 @@ RUN apt-get update && apt-get install -y \
 
 # Pre-install common gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle config set --local jobs 4 && \
-    bundle install && \
-    rm -rf /usr/local/bundle/cache/*.gem && \
-    find /usr/local/bundle/gems -name "*.c" -delete && \
-    find /usr/local/bundle/gems -name "*.o" -delete
+RUN bundle install --jobs 4
 
 # Copy application files
 COPY . .
