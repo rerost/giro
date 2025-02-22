@@ -28,18 +28,18 @@ jobs:
           -t test \
           ./example/multiple_package/server
 
-        # Start services
-        docker run -d -p 5001:5001 test
-        go run example/multiple_package/main.go &
-        sleep 2
+        # Start services with correct ports
+        docker run -d -p 5001:5001 test  # Ruby gRPC server
+        APP_PORT=5000 go run example/multiple_package/main.go &  # Go reflection server
+        sleep 2  # Wait for services to start
 
         # Run tests sequentially
         echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-        go run cmd/giro/main.go ls > ls_result.txt
+        go run cmd/giro/main.go ls --reflection-server=localhost:5000 > ls_result.txt
         diff ls_result.txt ls_expect.txt
 
         echo "{\"message\":\"test\"}" > call_expect.txt
-        go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        go run cmd/giro/main.go call --reflection-server=localhost:5000 --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
         diff call_result.txt call_expect.txt
 
   check_make_protoc:
