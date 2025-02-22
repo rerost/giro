@@ -7,6 +7,8 @@ require "protos/one/one_services_pb"
 require "protos/two/two_services_pb"
 
 require 'grpc'
+require 'grpc/health/v1/health_services_pb'
+require 'grpc/reflection/v1alpha/reflection'
 
 class GiroService < Example::MultiplePackage::Protos::One::GiroService::Service
   def giro_test1(req, _call)
@@ -28,14 +30,25 @@ class BqvService < Example::MultiplePackage::Protos::Two::BqvService::Service
   end
 end
 
+class HealthCheckService < Grpc::Health::V1::Health::Service
+  def check(health_check_request, _unused_call)
+    Grpc::Health::V1::HealthCheckResponse.new(
+      status: Grpc::Health::V1::HealthCheckResponse::ServingStatus::SERVING
+    )
+  end
+end
+
 def main
   s = GRPC::RpcServer.new
-  addr = "0.0.0.0:5001"
+  port = ENV.fetch('APP_PORT', '5001')
+  addr = "0.0.0.0:#{port}"
   s.add_http2_port(addr, :this_port_is_insecure)
-  puts "Listing " + addr
+  puts "Starting gRPC server on #{addr}"
 
   s.handle(GiroService.new)
   s.handle(BqvService.new)
+  s.handle(HealthCheckService.new)
+  s.handle(GRPC::Reflection::V1alpha::ServerReflection::Service.new)
   s.run_till_terminated
 end
 
