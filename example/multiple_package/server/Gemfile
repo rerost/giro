@@ -4,8 +4,7 @@ source "https://rubygems.org"
 
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
-# gem "rails"
-
 gem "google-protobuf", "~> 4.0"
-
 gem "grpc", "~> 1.34"
+gem "grpc-tools", "~> 1.34"
+gem "grpc-health-probe", "~> 0.4"
