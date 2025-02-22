@@ -36,7 +36,7 @@ jobs:
         docker run -d -p 5001:5001 test # RPC Server
         echo "reflection server"
         time go build example/multiple_package/main.go
-        time go run example/multiple_package/main.go & # Reflection Server
+        go run example/multiple_package/main.go & # Reflection Server
 
         echo "check ls"
         echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
