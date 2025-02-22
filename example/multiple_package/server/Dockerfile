@@ -1,10 +1,17 @@
-FROM ruby:3.4.2
+FROM ruby:3.4.2-slim
 
-COPY Gemfile ./
-COPY Gemfile.lock ./
+# Install minimal build dependencies for native extensions
+RUN apt-get update && apt-get install -y \
+    g++ \
+    make \
+    && rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 
-RUN bundle install
+# Pre-install common gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle install --jobs 4
 
+# Copy application files
 COPY . .
 
 CMD ["ruby", "server.rb"]
