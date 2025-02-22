@@ -15,10 +15,6 @@ jobs:
       uses: docker/setup-buildx-action@v3
     - name: Checkout repository
       uses: actions/checkout@v4
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: 'go.mod'
     - name: Build
       uses: docker/build-push-action@v6
       with:
@@ -30,6 +26,10 @@ jobs:
         cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
         tags: test
         load: true
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
     - name: Run
       run: |
         echo "docker run"
