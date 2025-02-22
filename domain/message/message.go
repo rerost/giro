@@ -34,6 +34,7 @@ func NewMessageService(client grpcreflectiface.Client, messageNameResolver messa
 		messageNameResolver: messageNameResolver,
 		jsonMarshaler: protojson.MarshalOptions{
 			EmitDefaultValues: true,
+			UseProtoNames:    true,
 		},
 	}
 }
