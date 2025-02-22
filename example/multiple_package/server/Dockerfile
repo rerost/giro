@@ -6,9 +6,10 @@ RUN apt-get update && apt-get install -y \
     make \
     && rm -rf /var/lib/apt/lists/*
 
-# Install gems
+# Install gems with parallel jobs
 COPY Gemfile Gemfile.lock ./
-RUN bundle install
+RUN bundle config set --local jobs 4 && \
+    bundle install
 
 COPY . .
 
