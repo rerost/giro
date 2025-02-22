@@ -32,6 +32,7 @@ end
 
 class HealthCheckService < Grpc::Health::V1::Health::Service
   def check(health_check_request, _unused_call)
+    puts "Health check called for service: #{health_check_request&.service || 'unknown'}"
     Grpc::Health::V1::HealthCheckResponse.new(
       status: Grpc::Health::V1::HealthCheckResponse::ServingStatus::SERVING
     )
@@ -44,6 +45,7 @@ def main
   addr = "0.0.0.0:#{port}"
   s.add_http2_port(addr, :this_port_is_insecure)
   puts "Starting gRPC server on #{addr}"
+  puts "Registering services..."
 
   s.handle(GiroService.new)
   s.handle(BqvService.new)

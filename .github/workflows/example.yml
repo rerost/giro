@@ -37,11 +37,11 @@ jobs:
         
         # Wait for services to be ready with gRPC health checks
         echo "Waiting for Ruby gRPC server..."
-        timeout 30s bash -c 'until grpcurl -plaintext localhost:5001 grpc.health.v1.Health/Check > /dev/null 2>&1; do sleep 1; done'
+        timeout 60s bash -c 'until grpcurl -plaintext -v localhost:5001 grpc.health.v1.Health/Check 2>&1 | grep "Response contents:" > /dev/null; do sleep 2; done'
         echo "Ruby gRPC server is ready"
         
         echo "Waiting for Go reflection server..."
-        timeout 30s bash -c 'until grpcurl -plaintext localhost:5000 grpc.health.v1.Health/Check > /dev/null 2>&1; do sleep 1; done'
+        timeout 60s bash -c 'until grpcurl -plaintext -v localhost:5000 grpc.health.v1.Health/Check 2>&1 | grep "Response contents:" > /dev/null; do sleep 2; done'
         echo "Go reflection server is ready"
 
         # Run tests sequentially
