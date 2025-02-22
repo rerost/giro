@@ -1,4 +1,4 @@
-FROM ruby:3.4.2-slim
+FROM ruby:3.2-slim
 
 # Install minimal build dependencies for native extensions
 RUN --mount=type=cache,target=/var/cache/apt \
