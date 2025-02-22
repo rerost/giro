@@ -47,10 +47,13 @@ jobs:
     - name: Run
       run: |
         echo "docker run"
-        time docker run -d -p 5001:5001 test # RPC Server
+        docker run -d -p 5001:5001 test # RPC Server
         echo "reflection server"
         ./bin/example_server & # Use pre-built binary instead of go run
-
+        
+        # Wait for servers to be ready
+        sleep 5
+        
         echo "check ls"
         echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
         ./bin/giro ls > ls_result.txt # Use pre-built binary instead of go run
