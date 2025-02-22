@@ -1,15 +1,7 @@
-FROM ruby:3.4.2-slim
+FROM giro-base:latest
 
-# Install minimal build dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    make \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install gems with parallel jobs
-COPY Gemfile Gemfile.lock ./
-RUN bundle config set --local jobs 4 && \
-    bundle install
+# Copy application files
+COPY . .
 
 COPY . .
 

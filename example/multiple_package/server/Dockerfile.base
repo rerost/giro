@@ -1,0 +1,15 @@
+FROM ruby:3.4.2-slim
+
+# Install minimal build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pre-install common gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle config set --local jobs 4 && \
+    bundle install && \
+    rm -rf /usr/local/bundle/cache/*.gem && \
+    find /usr/local/bundle/gems -name "*.c" -delete && \
+    find /usr/local/bundle/gems -name "*.o" -delete
