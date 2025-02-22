@@ -1,12 +1,17 @@
 FROM ruby:3.2-slim
 
-# Install minimal build dependencies for native extensions
+# Install build dependencies for native extensions
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get install -y \
     g++ \
     make \
     pkg-config \
     libssl-dev \
+    automake \
+    libtool \
+    autoconf \
+    git \
+    curl \
     && rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 

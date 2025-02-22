@@ -5,6 +5,12 @@ source "https://rubygems.org"
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 # Pin to specific versions for stability
-gem "google-protobuf", "~> 3.24.0"
-gem "grpc", "~> 1.58.0"
-gem "grpc-tools", "~> 1.58.0"
+gem "google-protobuf", "3.24.3"
+gem "grpc", "1.58.0"
+gem "grpc-tools", "1.58.0"
+
+# Add platform specification to ensure native extensions are built correctly
+platforms :ruby do
+  gem 'google-protobuf'
+  gem 'grpc'
+end
