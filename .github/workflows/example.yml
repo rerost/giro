@@ -19,6 +19,20 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
+    - name: Go Build Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-build-
+    - name: Build Example Binary
+      run: |
+        # Build the binaries once with proper caching
+        go build -o bin/example_server example/multiple_package/main.go
+        go build -o bin/giro cmd/giro/main.go
     - name: Build
       uses: docker/build-push-action@v6
       with:
@@ -35,17 +49,17 @@ jobs:
         echo "docker run"
         time docker run -d -p 5001:5001 test # RPC Server
         echo "reflection server"
-        time go run example/multiple_package/main.go & # Reflection Server
+        ./bin/example_server & # Use pre-built binary instead of go run
 
         echo "check ls"
-        time echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-        time go run cmd/giro/main.go ls > ls_result.txt
-        time diff ls_result.txt ls_expect.txt
+        echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
+        ./bin/giro ls > ls_result.txt # Use pre-built binary instead of go run
+        diff ls_result.txt ls_expect.txt
 
         echo "check call"
-        time echo "{\"message\":\"test\"}" > call_expect.txt
-        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
-        time diff call_result.txt call_expect.txt
+        echo "{\"message\":\"test\"}" > call_expect.txt
+        ./bin/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        diff call_result.txt call_expect.txt
 
   check_make_protoc:
     runs-on: ubuntu-latest
