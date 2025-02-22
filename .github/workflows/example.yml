@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Check Docker Build
     steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Set up Go
@@ -24,10 +22,6 @@ jobs:
       with:
         context: ./example/multiple_package/server
         push: false
-        cache-from: |
-          type=gha,scope=master
-          type=gha,scope=${{ github.ref_name }}
-        cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
         tags: test
         load: true
     - name: Run
