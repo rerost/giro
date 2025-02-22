@@ -44,7 +44,7 @@ def main
     s = GRPC::RpcServer.new
     port = ENV.fetch('APP_PORT', '5001')
     addr = "0.0.0.0:#{port}"
-    puts "Initializing Ruby gRPC server..."
+    puts "Initializing Ruby gRPC server on port #{port}..."
     s.add_http2_port(addr, :this_port_is_insecure)
     puts "Successfully bound to #{addr}"
     puts "Registering services..."

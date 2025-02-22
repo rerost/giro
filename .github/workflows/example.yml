@@ -33,7 +33,7 @@ jobs:
 
         # Start services with correct ports and health check
         echo "Starting Ruby gRPC server..."
-        RUBY_CONTAINER_ID=$(docker run -d -p 5001:5001 test)  # Ruby gRPC server
+        RUBY_CONTAINER_ID=$(docker run -d -e APP_PORT=5001 -p 5001:5001 test)  # Ruby gRPC server
         echo "Ruby container ID: $RUBY_CONTAINER_ID"
         echo "Starting Go reflection server..."
         APP_PORT=5000 go run example/multiple_package/main.go &  # Go reflection server
