@@ -7,6 +7,8 @@ require "protos/one/one_services_pb"
 require "protos/two/two_services_pb"
 
 require 'grpc'
+require 'grpc/health/v1/health_services_pb'
+require 'grpc/reflection/v1alpha/reflection'
 
 class GiroService < Example::MultiplePackage::Protos::One::GiroService::Service
   def giro_test1(req, _call)
@@ -28,15 +30,42 @@ class BqvService < Example::MultiplePackage::Protos::Two::BqvService::Service
   end
 end
 
-def main
-  s = GRPC::RpcServer.new
-  addr = "0.0.0.0:5001"
-  s.add_http2_port(addr, :this_port_is_insecure)
-  puts "Listing " + addr
+class HealthCheckService < Grpc::Health::V1::Health::Service
+  def check(health_check_request, _unused_call)
+    puts "Health check called for service: #{health_check_request&.service || 'unknown'}"
+    Grpc::Health::V1::HealthCheckResponse.new(
+      status: Grpc::Health::V1::HealthCheckResponse::ServingStatus::SERVING
+    )
+  end
+end
 
-  s.handle(GiroService.new)
-  s.handle(BqvService.new)
-  s.run_till_terminated
+def main
+  begin
+    s = GRPC::RpcServer.new
+    port = ENV.fetch('APP_PORT', '5001')
+    addr = "0.0.0.0:#{port}"
+    puts "Initializing Ruby gRPC server on port #{port}..."
+    s.add_http2_port(addr, :this_port_is_insecure)
+    puts "Successfully bound to #{addr}"
+    puts "Registering services..."
+
+    s.handle(GiroService.new)
+    puts "Registered GiroService"
+    s.handle(BqvService.new)
+    puts "Registered BqvService"
+    s.handle(HealthCheckService.new)
+    puts "Registered HealthCheckService"
+    s.handle(GRPC::Reflection::V1alpha::ServerReflection::Service.new)
+    puts "Registered ServerReflection"
+    puts "All services registered, starting server..."
+    STDOUT.flush  # Ensure logs are flushed
+    s.run_till_terminated
+  rescue => e
+    puts "Error starting server: #{e.message}"
+    puts e.backtrace
+    STDOUT.flush
+    exit 1
+  end
 end
 
 main
