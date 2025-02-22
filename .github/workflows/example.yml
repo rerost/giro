@@ -7,10 +7,9 @@ on:
     branches: [ master ]
 
 jobs:
-  check_docker_build:
+  check-docker-build:
     runs-on: ubuntu-latest
     name: Check Docker Build
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
