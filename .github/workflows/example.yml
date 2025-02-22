@@ -7,9 +7,54 @@ on:
     branches: [ master ]
 
 jobs:
-  check_docker_build:
+  docker_build:
     runs-on: ubuntu-latest
-    name: Check Docker Build
+    name: Docker Build
+    outputs:
+      image: ${{ steps.build.outputs.imageid }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container
+        driver-opts: |
+          image=moby/buildkit:latest
+          network=host
+        buildkitd-flags: |
+          --allow-insecure-entitlement network.host
+        buildkitd-config-inline: |
+          [worker.oci]
+          max-parallelism=4
+          [worker.containerd]
+          max-parallelism=4
+          gc=false
+    - name: Build
+      id: build
+      uses: docker/build-push-action@v6
+      with:
+        context: ./example/multiple_package/server
+        push: false
+        cache-from: |
+          type=gha,scope=master
+          type=gha,scope=${{ github.ref_name }}
+        cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
+        tags: test
+        load: true
+        outputs: type=docker,dest=/tmp/image.tar
+        build-args: |
+          BUILDKIT_STEP_LOG_MAX_SIZE=10485760
+          BUILDKIT_STEP_LOG_MAX_SPEED=10485760
+
+  test_services:
+    needs: docker_build
+    runs-on: ubuntu-latest
+    name: Test Services
+    strategy:
+      matrix:
+        test: ['ls', 'call']
+      fail-fast: false
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -17,29 +62,24 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
-    - name: Build
-      uses: docker/build-push-action@v6
-      with:
-        context: ./example/multiple_package/server
-        push: false
-        tags: test
-        load: true
-    - name: Run
+    - name: Load image
+      run: docker load --input /tmp/image.tar
+    - name: Start services
       run: |
-        echo "docker run"
-        time docker run -d -p 5001:5001 test # RPC Server
-        echo "reflection server"
-        time go run example/multiple_package/main.go & # Reflection Server
-
-        echo "check ls"
-        time echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-        time go run cmd/giro/main.go ls > ls_result.txt
-        time diff ls_result.txt ls_expect.txt
-
-        echo "check call"
-        time echo "{\"message\":\"test\"}" > call_expect.txt
-        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
-        time diff call_result.txt call_expect.txt
+        docker run -d -p 5001:5001 test
+        go run example/multiple_package/main.go &
+        sleep 5 # Wait for services to be ready
+    - name: Run ${{ matrix.test }} test
+      run: |
+        if [ "${{ matrix.test }}" = "ls" ]; then
+          echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
+          go run cmd/giro/main.go ls > ls_result.txt
+          diff ls_result.txt ls_expect.txt
+        else
+          echo "{\"message\":\"test\"}" > call_expect.txt
+          go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+          diff call_result.txt call_expect.txt
+        fi
 
   check_make_protoc:
     runs-on: ubuntu-latest
