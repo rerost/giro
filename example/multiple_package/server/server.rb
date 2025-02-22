@@ -44,13 +44,18 @@ def main
   port = ENV.fetch('APP_PORT', '5001')
   addr = "0.0.0.0:#{port}"
   s.add_http2_port(addr, :this_port_is_insecure)
-  puts "Starting gRPC server on #{addr}"
+  puts "Starting Ruby gRPC server on #{addr}"
   puts "Registering services..."
 
   s.handle(GiroService.new)
+  puts "Registered GiroService"
   s.handle(BqvService.new)
+  puts "Registered BqvService"
   s.handle(HealthCheckService.new)
+  puts "Registered HealthCheckService"
   s.handle(GRPC::Reflection::V1alpha::ServerReflection::Service.new)
+  puts "Registered ServerReflection"
+  puts "All services registered, starting server..."
   s.run_till_terminated
 end
 

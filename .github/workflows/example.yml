@@ -32,12 +32,15 @@ jobs:
           ./example/multiple_package/server
 
         # Start services with correct ports and health check
+        echo "Starting Ruby gRPC server..."
         docker run -d -p 5001:5001 test  # Ruby gRPC server
+        echo "Starting Go reflection server..."
         APP_PORT=5000 go run example/multiple_package/main.go &  # Go reflection server
         
         # Wait for services to be ready with gRPC health checks
         echo "Waiting for Ruby gRPC server..."
-        timeout 60s bash -c 'until grpcurl -plaintext -v localhost:5001 grpc.health.v1.Health/Check 2>&1 | grep "Response contents:" > /dev/null; do sleep 2; done'
+        docker logs $(docker ps -q --filter ancestor=test) || true
+        timeout 60s bash -c 'until grpcurl -plaintext -v localhost:5001 grpc.health.v1.Health/Check 2>&1 | tee /dev/stderr | grep "Response contents:" > /dev/null; do sleep 2; docker logs $(docker ps -q --filter ancestor=test) || true; done'
         echo "Ruby gRPC server is ready"
         
         echo "Waiting for Go reflection server..."
