@@ -40,23 +40,32 @@ class HealthCheckService < Grpc::Health::V1::Health::Service
 end
 
 def main
-  s = GRPC::RpcServer.new
-  port = ENV.fetch('APP_PORT', '5001')
-  addr = "0.0.0.0:#{port}"
-  s.add_http2_port(addr, :this_port_is_insecure)
-  puts "Starting Ruby gRPC server on #{addr}"
-  puts "Registering services..."
+  begin
+    s = GRPC::RpcServer.new
+    port = ENV.fetch('APP_PORT', '5001')
+    addr = "0.0.0.0:#{port}"
+    puts "Initializing Ruby gRPC server..."
+    s.add_http2_port(addr, :this_port_is_insecure)
+    puts "Successfully bound to #{addr}"
+    puts "Registering services..."
 
-  s.handle(GiroService.new)
-  puts "Registered GiroService"
-  s.handle(BqvService.new)
-  puts "Registered BqvService"
-  s.handle(HealthCheckService.new)
-  puts "Registered HealthCheckService"
-  s.handle(GRPC::Reflection::V1alpha::ServerReflection::Service.new)
-  puts "Registered ServerReflection"
-  puts "All services registered, starting server..."
-  s.run_till_terminated
+    s.handle(GiroService.new)
+    puts "Registered GiroService"
+    s.handle(BqvService.new)
+    puts "Registered BqvService"
+    s.handle(HealthCheckService.new)
+    puts "Registered HealthCheckService"
+    s.handle(GRPC::Reflection::V1alpha::ServerReflection::Service.new)
+    puts "Registered ServerReflection"
+    puts "All services registered, starting server..."
+    STDOUT.flush  # Ensure logs are flushed
+    s.run_till_terminated
+  rescue => e
+    puts "Error starting server: #{e.message}"
+    puts e.backtrace
+    STDOUT.flush
+    exit 1
+  end
 end
 
 main
