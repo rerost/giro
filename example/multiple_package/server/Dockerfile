@@ -6,6 +6,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     g++ \
     make \
     pkg-config \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
