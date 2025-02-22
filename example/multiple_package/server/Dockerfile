@@ -1,4 +1,4 @@
-FROM ruby:3.4.2-slim as builder
+FROM ruby:3.4.2-slim
 
 # Install minimal build dependencies
 RUN apt-get update && apt-get install -y \
@@ -10,10 +10,6 @@ RUN apt-get update && apt-get install -y \
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-FROM ruby:3.4.2-slim
-
-# Copy only necessary files
-COPY --from=builder /usr/local/bundle /usr/local/bundle
 COPY . .
 
 CMD ["ruby", "server.rb"]
