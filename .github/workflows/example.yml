@@ -32,16 +32,16 @@ jobs:
         load: true
     - name: Run
       run: |
-        docker run -d -p 5001:5001 test # RPC Server
-        go run example/multiple_package/main.go & # Reflection Server
+        time docker run -d -p 5001:5001 test # RPC Server
+        time go run example/multiple_package/main.go & # Reflection Server
 
-        echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-        go run cmd/giro/main.go ls > ls_result.txt
-        diff ls_result.txt ls_expect.txt
+        time echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
+        time go run cmd/giro/main.go ls > ls_result.txt
+        time diff ls_result.txt ls_expect.txt
 
-        echo "{\"message\":\"test\"}" > call_expect.txt
-        go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
-        diff call_result.txt call_expect.txt
+        time echo "{\"message\":\"test\"}" > call_expect.txt
+        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        time diff call_result.txt call_expect.txt
 
   check_make_protoc:
     runs-on: ubuntu-latest
