@@ -7,11 +7,9 @@ on:
     branches: [ master ]
 
 jobs:
-  docker_build:
+  check_docker_build:
     runs-on: ubuntu-latest
-    name: Docker Build
-    outputs:
-      image: ${{ steps.build.outputs.imageid }}
+    name: Check Docker Build
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -30,67 +28,35 @@ jobs:
           [worker.containerd]
           max-parallelism=4
           gc=false
-    - name: Build
-      id: build
-      uses: docker/build-push-action@v6
-      with:
-        context: ./example/multiple_package/server
-        push: false
-        cache-from: |
-          type=gha,scope=master
-          type=gha,scope=${{ github.ref_name }}
-        cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
-        tags: test
-        load: true
-        outputs: type=docker,dest=/tmp/image.tar
-        build-args: |
-          BUILDKIT_STEP_LOG_MAX_SIZE=10485760
-          BUILDKIT_STEP_LOG_MAX_SPEED=10485760
-    - name: Upload Docker image
-      uses: actions/upload-artifact@v4
-      with:
-        name: docker-image
-        path: /tmp/image.tar
-        retention-days: 1
-
-  test_services:
-    needs: docker_build
-    runs-on: ubuntu-latest
-    name: Test Services
-    strategy:
-      matrix:
-        test: ['ls', 'call']
-      fail-fast: false
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
-    - name: Download Docker image
-      uses: actions/download-artifact@v4
-      with:
-        name: docker-image
-        path: /tmp
-    - name: Load image
-      run: docker load --input /tmp/image.tar
-    - name: Start services
+    - name: Build and Test
       run: |
+        # Build with optimized BuildKit settings
+        docker build \
+          --cache-from type=gha,scope=master \
+          --cache-from type=gha,scope=${{ github.ref_name }} \
+          --cache-to type=gha,mode=max,scope=${{ github.ref_name }} \
+          -t test \
+          ./example/multiple_package/server
+
+        # Start services with health check
         docker run -d -p 5001:5001 test
         go run example/multiple_package/main.go &
-        sleep 5 # Wait for services to be ready
-    - name: Run ${{ matrix.test }} test
-      run: |
-        if [ "${{ matrix.test }}" = "ls" ]; then
-          echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-          go run cmd/giro/main.go ls > ls_result.txt
-          diff ls_result.txt ls_expect.txt
-        else
-          echo "{\"message\":\"test\"}" > call_expect.txt
-          go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
-          diff call_result.txt call_expect.txt
-        fi
+        
+        # Wait for gRPC service to be ready
+        timeout 10s bash -c 'until nc -z localhost 5001; do sleep 0.1; done'
+
+        # Run tests
+        echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
+        go run cmd/giro/main.go ls > ls_result.txt
+        diff ls_result.txt ls_expect.txt
+
+        echo "{\"message\":\"test\"}" > call_expect.txt
+        go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        diff call_result.txt call_expect.txt
 
   check_make_protoc:
     runs-on: ubuntu-latest
