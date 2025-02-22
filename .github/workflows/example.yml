@@ -21,6 +21,9 @@ jobs:
         go-version-file: 'go.mod'
     - name: Build and Test
       run: |
+        # Install health check tools
+        go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
+        
         # Build with minimal cache configuration
         docker build \
           --cache-from type=gha,scope=${{ github.ref_name }} \
@@ -31,9 +34,6 @@ jobs:
         # Start services with correct ports and health check
         docker run -d -p 5001:5001 test  # Ruby gRPC server
         APP_PORT=5000 go run example/multiple_package/main.go &  # Go reflection server
-        
-        # Install grpcurl for health checks
-        go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
         
         # Wait for services to be ready with gRPC health checks
         echo "Waiting for Ruby gRPC server..."
