@@ -46,6 +46,11 @@ jobs:
         time echo "{\"message\":\"test\"}" > call_expect.txt
         time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
         time diff call_result.txt call_expect.txt
+        
+        echo "check empty call"
+        time echo "{}" > empty_call_expect.txt
+        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroEmptyTest '{}' > empty_call_result.txt
+        time diff empty_call_result.txt empty_call_expect.txt
 
   check_make_protoc:
     runs-on: ubuntu-latest

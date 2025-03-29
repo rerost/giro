@@ -49,6 +49,28 @@ func (s *testServiceServerImpl) Echo(ctx context.Context, req *EchoRequest) (*Ec
 	}, nil
 }
 
+func (s *testServiceServerImpl) EmptyCall(ctx context.Context, _ *Empty) (*EmptyResponse, error) {
+	md := map[string]*MetadataValue{}
+
+	metadata, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		_metadata := map[string][]string(metadata)
+
+		for k, v := range _metadata {
+			md[k] = &MetadataValue{
+				Value: v,
+			}
+		}
+	}
+
+	return &EmptyResponse{
+		Status: "ok",
+		Metadata: &Metadata{
+			Metadata: md,
+		},
+	}, nil
+}
+
 func NewHostsServiceServer() hosts_pb.HostServiceServer {
 	return &hostsServiceServerImpl{
 		hosts: map[string]string{
