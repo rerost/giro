@@ -4,8 +4,10 @@
 
 require 'google/protobuf'
 
+require 'google/protobuf/empty_pb'
 
-descriptor_data = "\n\x14protos/one/one.proto\x12#example.multiple_package.protos.one\"#\n\x10GiroTestRequest1\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x12\n\x10GiroTestRequest2\"$\n\x11GiroTestResponse1\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x13\n\x11GiroTestResponse22\x89\x02\n\x0bGiroService\x12|\n\tGiroTest1\x12\x35.example.multiple_package.protos.one.GiroTestRequest1\x1a\x36.example.multiple_package.protos.one.GiroTestResponse1\"\x00\x12|\n\tGiroTest2\x12\x35.example.multiple_package.protos.one.GiroTestRequest2\x1a\x36.example.multiple_package.protos.one.GiroTestResponse2\"\x00\x42\x43ZAgithub.com/rerost/giro/example/multiple_package/protos/one;one_pbb\x06proto3"
+
+descriptor_data = "\n\x14protos/one/one.proto\x12#example.multiple_package.protos.one\x1a\x1bgoogle/protobuf/empty.proto\"#\n\x10GiroTestRequest1\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x12\n\x10GiroTestRequest2\"$\n\x11GiroTestResponse1\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x13\n\x11GiroTestResponse22\xcc\x02\n\x0bGiroService\x12|\n\tGiroTest1\x12\x35.example.multiple_package.protos.one.GiroTestRequest1\x1a\x36.example.multiple_package.protos.one.GiroTestResponse1\"\x00\x12|\n\tGiroTest2\x12\x35.example.multiple_package.protos.one.GiroTestRequest2\x1a\x36.example.multiple_package.protos.one.GiroTestResponse2\"\x00\x12\x41\n\rGiroEmptyTest\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x00\x42\x43ZAgithub.com/rerost/giro/example/multiple_package/protos/one;one_pbb\x06proto3"
 
 pool = Google::Protobuf::DescriptorPool.generated_pool
 pool.add_serialized_file(descriptor_data)

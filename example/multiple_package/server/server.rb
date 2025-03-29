@@ -5,6 +5,7 @@ require "protos/one/one_pb"
 require "protos/two/two_pb"
 require "protos/one/one_services_pb"
 require "protos/two/two_services_pb"
+require "google/protobuf/empty_pb"
 
 require 'grpc'
 
@@ -15,6 +16,10 @@ class GiroService < Example::MultiplePackage::Protos::One::GiroService::Service
 
   def giro_test2(_req, _call)
     return Example::MultiplePackage::Protos::One::GiroTestResponse2.new
+  end
+  
+  def giro_empty_test(_req, _call)
+    return Google::Protobuf::Empty.new
   end
 end
 

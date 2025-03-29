@@ -19,6 +19,7 @@ module Example
 
             rpc :GiroTest1, ::Example::MultiplePackage::Protos::One::GiroTestRequest1, ::Example::MultiplePackage::Protos::One::GiroTestResponse1
             rpc :GiroTest2, ::Example::MultiplePackage::Protos::One::GiroTestRequest2, ::Example::MultiplePackage::Protos::One::GiroTestResponse2
+            rpc :GiroEmptyTest, ::Google::Protobuf::Empty, ::Google::Protobuf::Empty
           end
 
           Stub = Service.rpc_stub_class

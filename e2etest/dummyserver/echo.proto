@@ -4,6 +4,7 @@ package rerost.giro.v1;
 option go_package = "github.com/rerost/giro/e2etest/dummyserver;dummyserver";
 
 import "rerost/giro/hosts.proto";
+import "google/protobuf/empty.proto";
 
 message MetadataValue {
   repeated string value = 1;
@@ -23,10 +24,16 @@ message EchoResponse {
   Metadata metadata = 2;
 }
 
+message EmptyResponse {
+  string status = 1;
+  Metadata metadata = 2;
+}
+
 service TestService {
   option (rerost.giro.v1.host_option) = {
     host: "localhost:5000"
   };
   rpc Echo(EchoRequest) returns (EchoResponse) {}
+  rpc EmptyCall(google.protobuf.Empty) returns (EmptyResponse) {}
 }
 

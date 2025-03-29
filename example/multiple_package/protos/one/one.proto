@@ -3,6 +3,8 @@ package example.multiple_package.protos.one;
 
 option go_package = "github.com/rerost/giro/example/multiple_package/protos/one;one_pb";
 
+import "google/protobuf/empty.proto";
+
 message GiroTestRequest1 {
   string message = 1;
 }
@@ -21,4 +23,5 @@ message GiroTestResponse2 {
 service GiroService {
   rpc GiroTest1(GiroTestRequest1) returns (GiroTestResponse1) {}
   rpc GiroTest2(GiroTestRequest2) returns (GiroTestResponse2) {}
+  rpc GiroEmptyTest(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 }

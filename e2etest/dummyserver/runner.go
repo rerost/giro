@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	status "google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func Run(port string) (func(), error) {
@@ -43,6 +44,28 @@ func (s *testServiceServerImpl) Echo(ctx context.Context, req *EchoRequest) (*Ec
 
 	return &EchoResponse{
 		Message: req.GetMessage(),
+		Metadata: &Metadata{
+			Metadata: md,
+		},
+	}, nil
+}
+
+func (s *testServiceServerImpl) EmptyCall(ctx context.Context, _ *emptypb.Empty) (*EmptyResponse, error) {
+	md := map[string]*MetadataValue{}
+
+	metadata, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		_metadata := map[string][]string(metadata)
+
+		for k, v := range _metadata {
+			md[k] = &MetadataValue{
+				Value: v,
+			}
+		}
+	}
+
+	return &EmptyResponse{
+		Status: "ok",
 		Metadata: &Metadata{
 			Metadata: md,
 		},
