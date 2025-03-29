@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	hosts_pb "github.com/rerost/giro/rerost/giro"
 	"google.golang.org/grpc"
@@ -14,6 +13,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	status "google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func Run(port string) (func(), error) {
@@ -50,7 +50,7 @@ func (s *testServiceServerImpl) Echo(ctx context.Context, req *EchoRequest) (*Ec
 	}, nil
 }
 
-func (s *testServiceServerImpl) EmptyCall(ctx context.Context, _ *empty.Empty) (*EmptyResponse, error) {
+func (s *testServiceServerImpl) EmptyCall(ctx context.Context, _ *emptypb.Empty) (*EmptyResponse, error) {
 	md := map[string]*MetadataValue{}
 
 	metadata, ok := metadata.FromIncomingContext(ctx)
