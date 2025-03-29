@@ -7,7 +7,7 @@
 package one_pb
 
 import (
-	empty "github.com/golang/protobuf/ptypes/empty"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -254,7 +254,7 @@ var file_protos_one_one_proto_goTypes = []interface{}{
 	(*GiroTestRequest2)(nil),  // 1: example.multiple_package.protos.one.GiroTestRequest2
 	(*GiroTestResponse1)(nil), // 2: example.multiple_package.protos.one.GiroTestResponse1
 	(*GiroTestResponse2)(nil), // 3: example.multiple_package.protos.one.GiroTestResponse2
-	(*empty.Empty)(nil),       // 4: google.protobuf.Empty
+	(*emptypb.Empty)(nil),       // 4: google.protobuf.Empty
 }
 var file_protos_one_one_proto_depIdxs = []int32{
 	0, // 0: example.multiple_package.protos.one.GiroService.GiroTest1:input_type -> example.multiple_package.protos.one.GiroTestRequest1

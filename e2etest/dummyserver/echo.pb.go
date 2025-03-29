@@ -7,7 +7,7 @@
 package dummyserver
 
 import (
-	empty "github.com/golang/protobuf/ptypes/empty"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	_ "github.com/rerost/giro/rerost/giro"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -304,7 +304,7 @@ var file_e2etest_dummyserver_echo_proto_goTypes = []any{
 	(*EchoResponse)(nil),  // 3: rerost.giro.v1.EchoResponse
 	(*EmptyResponse)(nil), // 4: rerost.giro.v1.EmptyResponse
 	nil,                   // 5: rerost.giro.v1.Metadata.MetadataEntry
-	(*empty.Empty)(nil),   // 6: google.protobuf.Empty
+	(*emptypb.Empty)(nil),   // 6: google.protobuf.Empty
 }
 var file_e2etest_dummyserver_echo_proto_depIdxs = []int32{
 	5, // 0: rerost.giro.v1.Metadata.metadata:type_name -> rerost.giro.v1.Metadata.MetadataEntry

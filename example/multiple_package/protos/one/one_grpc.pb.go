@@ -8,7 +8,7 @@ package one_pb
 
 import (
 	context "context"
-	empty "github.com/golang/protobuf/ptypes/empty"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -31,7 +31,7 @@ const (
 type GiroServiceClient interface {
 	GiroTest1(ctx context.Context, in *GiroTestRequest1, opts ...grpc.CallOption) (*GiroTestResponse1, error)
 	GiroTest2(ctx context.Context, in *GiroTestRequest2, opts ...grpc.CallOption) (*GiroTestResponse2, error)
-	GiroEmptyTest(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
+	GiroEmptyTest(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type giroServiceClient struct {
@@ -62,9 +62,9 @@ func (c *giroServiceClient) GiroTest2(ctx context.Context, in *GiroTestRequest2,
 	return out, nil
 }
 
-func (c *giroServiceClient) GiroEmptyTest(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *giroServiceClient) GiroEmptyTest(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(empty.Empty)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, GiroService_GiroEmptyTest_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (c *giroServiceClient) GiroEmptyTest(ctx context.Context, in *empty.Empty, 
 type GiroServiceServer interface {
 	GiroTest1(context.Context, *GiroTestRequest1) (*GiroTestResponse1, error)
 	GiroTest2(context.Context, *GiroTestRequest2) (*GiroTestResponse2, error)
-	GiroEmptyTest(context.Context, *empty.Empty) (*empty.Empty, error)
+	GiroEmptyTest(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	mustEmbedUnimplementedGiroServiceServer()
 }
 
@@ -95,7 +95,7 @@ func (UnimplementedGiroServiceServer) GiroTest1(context.Context, *GiroTestReques
 func (UnimplementedGiroServiceServer) GiroTest2(context.Context, *GiroTestRequest2) (*GiroTestResponse2, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GiroTest2 not implemented")
 }
-func (UnimplementedGiroServiceServer) GiroEmptyTest(context.Context, *empty.Empty) (*empty.Empty, error) {
+func (UnimplementedGiroServiceServer) GiroEmptyTest(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GiroEmptyTest not implemented")
 }
 func (UnimplementedGiroServiceServer) mustEmbedUnimplementedGiroServiceServer() {}
@@ -156,7 +156,7 @@ func _GiroService_GiroTest2_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 func _GiroService_GiroEmptyTest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func _GiroService_GiroEmptyTest_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: GiroService_GiroEmptyTest_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GiroServiceServer).GiroEmptyTest(ctx, req.(*empty.Empty))
+		return srv.(GiroServiceServer).GiroEmptyTest(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
