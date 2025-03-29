@@ -17,8 +17,10 @@ RUN bundle install --jobs 4 && \
 # Copy application files
 COPY . .
 
-# Create symbolic link for google/protobuf directory
+# Create empty.proto file if it doesn't exist
 RUN mkdir -p /usr/include/google/protobuf && \
-    ln -sf /usr/include/google/protobuf/empty.proto /usr/include/google/protobuf/empty.proto
+    if [ ! -f /usr/include/google/protobuf/empty.proto ]; then \
+      echo 'syntax = "proto3";\npackage google.protobuf;\nmessage Empty {}\n' > /usr/include/google/protobuf/empty.proto; \
+    fi
 
 CMD ["ruby", "server.rb"]
