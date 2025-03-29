@@ -23,4 +23,7 @@ RUN mkdir -p /usr/include/google/protobuf && \
       echo 'syntax = "proto3";\npackage google.protobuf;\nmessage Empty {}\n' > /usr/include/google/protobuf/empty.proto; \
     fi
 
+# Set default port
+ENV APP_PORT=5001
+
 CMD ["ruby", "server.rb"]
