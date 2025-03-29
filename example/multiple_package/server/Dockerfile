@@ -4,6 +4,8 @@ FROM ruby:3.4.2-slim
 RUN apt-get update && apt-get install -y \
     g++ \
     make \
+    protobuf-compiler \
+    libprotobuf-dev \
     && rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
