@@ -17,11 +17,9 @@ RUN bundle install --jobs 4 && \
 # Copy application files
 COPY . .
 
-# Create empty.proto file if it doesn't exist
+# Create empty.proto file
 RUN mkdir -p /usr/include/google/protobuf && \
-    if [ ! -f /usr/include/google/protobuf/empty.proto ]; then \
-      echo 'syntax = "proto3";\npackage google.protobuf;\nmessage Empty {}\n' > /usr/include/google/protobuf/empty.proto; \
-    fi
+    echo -e 'syntax = "proto3";\npackage google.protobuf;\nmessage Empty {}\n' > /usr/include/google/protobuf/empty.proto
 
 # Set default port
 ENV APP_PORT=5001
