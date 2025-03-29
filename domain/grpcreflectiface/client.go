@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
 	"google.golang.org/protobuf/proto"
@@ -51,41 +52,6 @@ func (c *clientImpl) ListServices() ([]string, error) {
 
 	return services, nil
 }
-
-func (c *clientImpl) resolveFiles(files map[string]*descriptorpb.FileDescriptorProto, dep string) error {
-	if _, ok := files[dep]; ok {
-		return nil
-	}
-
-	depReq := grpc_reflection_v1.ServerReflectionRequest{
-		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileByFilename{
-			FileByFilename: dep,
-		},
-	}
-
-	depResp, err := c.call(&depReq)
-	if err != nil {
-		// Skip if file not found
-		return nil
-	}
-
-	for _, depFdProtoBytes := range depResp.GetFileDescriptorResponse().FileDescriptorProto {
-		var depFdProto descriptorpb.FileDescriptorProto
-		if err := proto.Unmarshal(depFdProtoBytes, &depFdProto); err != nil {
-			return errors.WithStack(err)
-		}
-		files[depFdProto.GetName()] = &depFdProto
-		// Resolve nested dependencies
-		for _, nestedDep := range depFdProto.GetDependency() {
-			if err := c.resolveFiles(files, nestedDep); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 func (c *clientImpl) ResolveService(serviceName string) (protoreflect.ServiceDescriptor, error) {
 	req := grpc_reflection_v1.ServerReflectionRequest{
 		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileContainingSymbol{
@@ -103,48 +69,48 @@ func (c *clientImpl) ResolveService(serviceName string) (protoreflect.ServiceDes
 		return nil, nil
 	}
 
-	files := map[string]*descriptorpb.FileDescriptorProto{}
+	// ファイルをレジストリに登録
+	registry := &protoregistry.Files{}
+	checkedFdNames := map[string]bool{}
+	registerFunc := func(fdProto *descriptorpb.FileDescriptorProto) error {
+		// 重複排除
+		if _, ok := checkedFdNames[fdProto.GetName()]; ok {
+			return nil
+		}
+		checkedFdNames[fdProto.GetName()] = true
+
+		file, err := protodesc.NewFile(fdProto, registry)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		return errors.WithStack(registry.RegisterFile(file))
+	}
+
 	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
 		var fdProto descriptorpb.FileDescriptorProto
 		if err := proto.Unmarshal(fdProtoBytes, &fdProto); err != nil {
 			return nil, errors.WithStack(err)
 		}
-		files[fdProto.GetName()] = &fdProto
 
-		// 依存するprotoファイルを取得
-		for _, dep := range fdProto.GetDependency() {
-			if err := c.resolveFiles(files, dep); err != nil {
-				return nil, err
-			}
+		if err := c.resolveFiles(registerFunc, &fdProto); err != nil {
+			return nil, err
 		}
 	}
-
-	// ファイルをレジストリに登録
-	registry := &protoregistry.Files{}
-	for _, fdProto := range files {
-		file, err := protodesc.NewFile(fdProto, registry)
+	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
+		var fdProto descriptorpb.FileDescriptorProto
+		if err := proto.Unmarshal(fdProtoBytes, &fdProto); err != nil {
+			return nil, errors.WithStack(err)
+		}
+		file, err := protodesc.NewFile(&fdProto, registry)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		if err := registry.RegisterFile(file); err != nil {
-			return nil, errors.WithStack(err)
-		}
-	}
-
-	// サービスディスクリプタを探す
-	for _, fdProto := range files {
-		file, err := protodesc.NewFile(fdProto, registry)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-
 		svcDescriptor = file.Services().ByName(protoreflect.FullName(serviceName).Name())
 		if svcDescriptor != nil {
-			break
+			return svcDescriptor, nil
 		}
 	}
-
-	return svcDescriptor, nil
+	return nil, errors.New("service not found")
 }
 
 func (c *clientImpl) ResolveMessage(messageName string) (proto.Message, error) {
@@ -159,6 +125,20 @@ func (c *clientImpl) ResolveMessage(messageName string) (proto.Message, error) {
 		return nil, errors.WithStack(err)
 	}
 
+	registry := &protoregistry.Files{}
+	checkedFdNames := map[string]bool{}
+	registerFunc := func(fdProto *descriptorpb.FileDescriptorProto) error {
+		// 重複排除
+		if _, ok := checkedFdNames[fdProto.GetName()]; ok {
+			return nil
+		}
+		checkedFdNames[fdProto.GetName()] = true
+		file, err := protodesc.NewFile(fdProto, registry)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		return registry.RegisterFile(file)
+	}
 	var dynamicMessage proto.Message
 	files := map[string]*descriptorpb.FileDescriptorProto{}
 	for _, fdProtoBytes := range resp.GetFileDescriptorResponse().FileDescriptorProto {
@@ -169,23 +149,8 @@ func (c *clientImpl) ResolveMessage(messageName string) (proto.Message, error) {
 		}
 		files[fdProto.GetName()] = &fdProto
 
-		// 依存するprotoファイルを取得
-		for _, dep := range fdProto.GetDependency() {
-			if err := c.resolveFiles(files, dep); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	// ファイルをレジストリに登録
-	registry := &protoregistry.Files{}
-	for _, fdProto := range files {
-		file, err := protodesc.NewFile(fdProto, registry)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		if err := registry.RegisterFile(file); err != nil {
-			return nil, errors.WithStack(err)
+		if err := c.resolveFiles(registerFunc, &fdProto); err != nil {
+			return nil, err
 		}
 	}
 
@@ -222,4 +187,51 @@ func (c *clientImpl) call(request *grpc_reflection_v1.ServerReflectionRequest) (
 	}
 
 	return response, nil
+}
+
+// 取得したfdProtoをRegisterFileする
+// 依存関係の末端からRegisterする
+// 依存関係が、FileA -> FileB の時、registerFuncが registerFunc(FileB), registerFunc(FileA) の順で呼ばれる
+// 深さ優先探索でRegister
+func (c *clientImpl) resolveFiles(
+	registerFunc func(fdProto *descriptorpb.FileDescriptorProto) error,
+	fdProto *descriptorpb.FileDescriptorProto,
+) error {
+	return c.resolveFilesInner(registerFunc, fdProto)
+}
+
+func (c *clientImpl) resolveFilesInner(
+	registerFunc func(fdProto *descriptorpb.FileDescriptorProto) error,
+	fdProto *descriptorpb.FileDescriptorProto,
+) error {
+	// 依存関係にあるファイルの、依存関係を解決
+	for _, depFdName := range fdProto.Dependency {
+		depReq := grpc_reflection_v1.ServerReflectionRequest{
+			MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileByFilename{
+				FileByFilename: depFdName,
+			},
+		}
+		depResp, err := c.call(&depReq)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		for _, depFdProtoBytes := range depResp.GetFileDescriptorResponse().FileDescriptorProto {
+			zap.L().Debug("Protofile Dependency", zap.String("sourceProto", fdProto.GetName()), zap.String("dependencyProto", depFdName))
+			var depFdProto descriptorpb.FileDescriptorProto
+			if err := proto.Unmarshal(depFdProtoBytes, &depFdProto); err != nil {
+				return errors.WithStack(err)
+			}
+			if err := c.resolveFilesInner(registerFunc, &depFdProto); err != nil {
+				return errors.WithStack(err)
+			}
+		}
+	}
+
+	// 自分自身をRegister
+	if err := registerFunc(fdProto); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }
