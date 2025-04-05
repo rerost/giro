@@ -36,7 +36,7 @@ func (mnr *messageNameResolverImpl) RequestMessageName(ctx context.Context, serv
 		return "", errors.WithStack(err)
 	}
 	if md == nil {
-		return "", fmt.Errorf("Method notfound, serviceName: %v, methodName: %v", serviceName, methodName)
+		return "", fmt.Errorf("Method notfound, serviceName: %v, methodName: %v", serviceName, methodName) //nolint:staticcheck // ST1005: tests expect capitalized error
 	}
 
 	return MessageName(md.Input().FullName()), nil

@@ -1,4 +1,10 @@
+version: "2"
+
+run:
+  go: '1.24'
+
 linters:
   disable:
     - errcheck
+    # Add comment to trigger CI
 

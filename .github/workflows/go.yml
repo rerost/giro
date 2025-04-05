@@ -65,7 +65,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.54.2
+          version: v2.0
   check-goreleaser:
     name: Check GoReleaser
     runs-on: ubuntu-latest
