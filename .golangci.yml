@@ -12,7 +12,8 @@ issues:
     - text: "Error: Method notfound"
       linters:
         - all
-    - text: "Error: Method not Found"
+    - path: e2etest/testdata/test.ct
+      text: "Error: Method not Found"
       linters:
         - all
 
