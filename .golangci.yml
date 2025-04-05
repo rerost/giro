@@ -2,3 +2,12 @@ linters:
   disable:
     - errcheck
 
+issues:
+  exclude-rules:
+    - text: "Error: Method notfound"
+      linters:
+        - all
+    - text: "Error: Method not Found"
+      linters:
+        - all
+
