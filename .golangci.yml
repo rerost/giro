@@ -6,4 +6,5 @@ run:
 linters:
   disable:
     - errcheck
+    # Add comment to trigger CI
 
