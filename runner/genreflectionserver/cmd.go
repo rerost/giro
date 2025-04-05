@@ -110,7 +110,7 @@ type ReflectionServerFile struct {
 }
 
 func PackageName(goImportPath string) string {
-	uniqName := strings.Replace(strings.Replace(strings.Replace(goImportPath, "/", "_", -1), ".", "_", -1), "-", "_", -1)
+	uniqName := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(goImportPath, "/", "_"), ".", "_"), "-", "_")
 	return uniqName
 }
 
