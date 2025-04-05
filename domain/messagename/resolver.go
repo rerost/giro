@@ -36,7 +36,7 @@ func (mnr *messageNameResolverImpl) RequestMessageName(ctx context.Context, serv
 		return "", errors.WithStack(err)
 	}
 	if md == nil {
-		return "", fmt.Errorf("method notfound, serviceName: %v, methodName: %v", serviceName, methodName)
+		return "", fmt.Errorf("Method notfound, serviceName: %v, methodName: %v", serviceName, methodName)
 	}
 
 	return MessageName(md.Input().FullName()), nil
