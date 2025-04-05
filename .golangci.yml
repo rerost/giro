@@ -7,8 +7,8 @@ linters:
   disable:
     - errcheck
 
-issues:
-  exclude-rules:
+exclusions:
+  rules:
     - text: "Error: Method notfound"
       linters:
         - all
