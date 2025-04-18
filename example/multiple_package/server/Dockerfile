@@ -1,4 +1,4 @@
-FROM ruby:3.4.2-slim
+FROM ruby:3.4.3-slim
 
 # Install minimal build dependencies for native extensions
 RUN apt-get update && apt-get install -y \
