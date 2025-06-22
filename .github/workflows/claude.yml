@@ -41,7 +41,7 @@ jobs:
                   "type": "http",
                   "url": "https://api.githubcopilot.com/mcp",
                   "headers": {
-                    "Authorization": "{{ secrets.CLAUDE_CODE_GITHUB_MCP_ACCESS_TOKEN }}"
+                    "Authorization": "${{ secrets.CLAUDE_CODE_GITHUB_MCP_ACCESS_TOKEN }}"
                   }
                 }
               }
