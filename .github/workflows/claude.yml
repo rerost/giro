@@ -34,4 +34,16 @@ jobs:
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mcp_config: |
+            {
+              "mcpServers": {
+                "github": {
+                  "type": "http",
+                  "url": "https://api.githubcopilot.com/mcp",
+                  "headers": {
+                    "Authorization": "{{ secrets.CLAUDE_CODE_GITHUB_MCP_ACCESS_TOKEN }}"
+                  }
+                }
+              }
+            }
 
