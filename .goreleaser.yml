@@ -49,9 +49,10 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-brews:
-  - repository:
+homebrew_casks:
+  - name: giro
+    repository:
       owner: rerost
       name: homebrew-tools
-    directory: Formula
+    directory: Casks
     homepage: https://github.com/rerost/giro
