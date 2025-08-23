@@ -446,11 +446,12 @@ func ProviderHostCmd() (HostCmd, error) {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			host2, err := hostResolver.Resolve(ctx, args[0])
+			host, err := hostResolver.Resolve(ctx, args[0])
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Println(host2)
+
+			fmt.Println(host)
 			return nil
 		},
 	}
@@ -481,6 +482,7 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 	cmd.PersistentFlags().StringP("rpc-server", "", "", "")
 	cmd.PersistentFlags().BoolP("verbose", "", false, "")
 	cmd.PersistentFlags().BoolP("debug", "", false, "")
+
 	cobra.OnInitialize(func() {
 		flags := cmd.PersistentFlags()
 		v := viper.New()
@@ -512,11 +514,21 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 			zcfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
 		}
 		l, err := zcfg.Build()
+		// TODO call l.Sync()
+
 		zap.ReplaceGlobals(l)
+
 		zap.L().Debug("config", zap.Any("config", config))
 	})
 
 	return cmd, nil
 }
 
-var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient, grpcreflectiface.NewClient, NewServerReflectionConn)
+var base = wire.NewSet(
+	service.NewServiceService,
+	message.NewMessageService,
+	messagename.NewMessageNameResolver,
+	NewServerReflectionClient,
+	grpcreflectiface.NewClient,
+	NewServerReflectionConn,
+)
