@@ -21,7 +21,7 @@ type Client interface {
 	ResolveMessage(messageName string) (proto.Message, error)
 }
 
-type Stream = grpc.BidiStreamingClient[grpc_reflection_v1.ServerReflectionRequest, grpc_reflection_v1.ServerReflectionResponse]
+type Stream = grpc_reflection_v1.ServerReflection_ServerReflectionInfoClient
 
 type clientImpl struct {
 	stream Stream
