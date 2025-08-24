@@ -16,7 +16,7 @@ import (
 	"github.com/rerost/giro/domain/message"
 	"github.com/rerost/giro/domain/messagename"
 	"github.com/rerost/giro/domain/service"
-	"github.com/rerost/giro/rerost/giro"
+	hosts_pb "github.com/rerost/giro/rerost/giro"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -446,11 +446,11 @@ func ProviderHostCmd() (HostCmd, error) {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			host2, err := hostResolver.Resolve(ctx, args[0])
+			host, err := hostResolver.Resolve(ctx, args[0])
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Println(host2)
+			fmt.Println(host)
 			return nil
 		},
 	}
@@ -519,4 +519,11 @@ func ProviderCmdRoot(lsCmd LsCmd, emptyJSONCmd EmptyJSONCmd, toJSONCmd ToJSONCmd
 	return cmd, nil
 }
 
-var base = wire.NewSet(service.NewServiceService, message.NewMessageService, messagename.NewMessageNameResolver, NewServerReflectionClient, grpcreflectiface.NewClient, NewServerReflectionConn)
+var base = wire.NewSet(
+	service.NewServiceService,
+	message.NewMessageService,
+	messagename.NewMessageNameResolver,
+	NewServerReflectionClient,
+	grpcreflectiface.NewClient,
+	NewServerReflectionConn,
+)
