@@ -14,7 +14,7 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v5
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
       id: go-test
@@ -31,7 +31,7 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v5
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
       id: go
@@ -48,7 +48,7 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v5
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
       id: go
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod' 
       - name: golangci-lint
