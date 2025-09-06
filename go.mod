@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmdtest v0.4.0
 	github.com/google/wire v0.7.0
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.20.1
 	go.uber.org/zap v1.27.0
