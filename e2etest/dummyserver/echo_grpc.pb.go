@@ -77,10 +77,10 @@ type TestServiceServer interface {
 type UnimplementedTestServiceServer struct{}
 
 func (UnimplementedTestServiceServer) Echo(context.Context, *EchoRequest) (*EchoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
+	return nil, status.Error(codes.Unimplemented, "method Echo not implemented")
 }
 func (UnimplementedTestServiceServer) EmptyCall(context.Context, *emptypb.Empty) (*EmptyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EmptyCall not implemented")
+	return nil, status.Error(codes.Unimplemented, "method EmptyCall not implemented")
 }
 func (UnimplementedTestServiceServer) mustEmbedUnimplementedTestServiceServer() {}
 func (UnimplementedTestServiceServer) testEmbeddedByValue()                     {}
@@ -93,7 +93,7 @@ type UnsafeTestServiceServer interface {
 }
 
 func RegisterTestServiceServer(s grpc.ServiceRegistrar, srv TestServiceServer) {
-	// If the following call pancis, it indicates UnimplementedTestServiceServer was
+	// If the following call panics, it indicates UnimplementedTestServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
