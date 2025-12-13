@@ -45,5 +45,5 @@ require (
 
 tool (
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	google.golang.org/protobuf/cmd/protoc-gen-go
+	google.golang.org/protobuf/cmd/protoc-gen-go v1.36.11
 )
