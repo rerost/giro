@@ -15,7 +15,7 @@ require (
 	go.uber.org/zap v1.27.1
 	golang.org/x/tools v0.40.0
 	google.golang.org/grpc v1.77.0
-	google.golang.org/protobuf v1.36.10
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
@@ -45,5 +45,5 @@ require (
 
 tool (
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	google.golang.org/protobuf/cmd/protoc-gen-go
+	google.golang.org/protobuf/cmd/protoc-gen-go v1.36.11
 )
