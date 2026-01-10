@@ -2,7 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     bigdecimal (3.3.1)
-    google-protobuf (4.33.2)
+    google-protobuf (4.33.3)
       bigdecimal
       rake (>= 13)
     googleapis-common-protos-types (1.22.0)
