@@ -33,7 +33,7 @@ jobs:
       if: steps.test.outcome == 'failure' && github.event_name == 'pull_request'
       id: update-snapshots
       run: |
-        UPDATE_SNAPSHOTS=true go test ./runner/genreflectionserver/...
+        UPDATE_SNAPSHOTS=true go test ./runner/genreflectionserver/... || true
         if git diff --quiet runner/genreflectionserver/.snapshots/; then
           echo "changed=false" >> "$GITHUB_OUTPUT"
         else
