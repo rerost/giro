@@ -10,20 +10,51 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v6
+      with:
+        ref: ${{ github.head_ref || github.ref }}
+        # GITHUB_TOKENによるpushはCIを再トリガーしない。
+        # 再トリガーが必要な場合はPATを設定する:
+        # token: ${{ secrets.PAT }}
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
       id: go-test
     - name: Test
+      id: test
+      continue-on-error: true
       run: go test -coverprofile=coverage.txt ./...
+    - name: Update snapshots
+      if: steps.test.outcome == 'failure' && github.event_name == 'pull_request'
+      id: update-snapshots
+      run: |
+        UPDATE_SNAPSHOTS=true go test ./runner/genreflectionserver/...
+        if git diff --quiet runner/genreflectionserver/.snapshots/; then
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Commit and push snapshot updates
+      if: steps.update-snapshots.outputs.changed == 'true'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add runner/genreflectionserver/.snapshots/
+        git commit -m "chore: update test snapshots"
+        git push
     - name: Upload coverage to Codecov
+      if: steps.test.outcome == 'success'
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+    - name: Fail if tests failed
+      if: steps.test.outcome == 'failure' && steps.update-snapshots.outputs.changed != 'true'
+      run: exit 1
   build:
     name: Go Build
     runs-on: ubuntu-latest
