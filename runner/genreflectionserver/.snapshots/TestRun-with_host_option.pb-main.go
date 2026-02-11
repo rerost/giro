@@ -48,7 +48,7 @@ func main() {
 	port := os.Getenv("APP_PORT")
 	if port == "" {
 		fmt.Println("Please set APP_PORT")
-		port = "5001"
+		port = "5000"
 	}
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
