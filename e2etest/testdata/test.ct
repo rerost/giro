@@ -24,10 +24,10 @@ $ giro host rerost.giro.v1.TestService
 localhost:5000
 
 $ giro call rerost.giro.v1.TestService/Echo {"message":"Test"} --metadata=key1:val1:key2:val2
-{"message":"Test", "metadata":{"metadata":{":authority":{"value":["localhost:5000"]}, "content-type":{"value":["application/grpc"]}, "key1":{"value":["val1"]}, "key2":{"value":["val2"]}, "user-agent":{"value":["grpc-go/1.78.0"]}}}}
+{"message":"Test", "metadata":{"metadata":{":authority":{"value":["localhost:5000"]}, "content-type":{"value":["application/grpc"]}, "key1":{"value":["val1"]}, "key2":{"value":["val2"]}, "user-agent":{"value":["grpc-go/1.79.1"]}}}}
 
 $ giro call rerost.giro.v1.TestService/EmptyCall {} --metadata=key1:val1:key2:val2
-{"status":"ok", "metadata":{"metadata":{":authority":{"value":["localhost:5000"]}, "content-type":{"value":["application/grpc"]}, "key1":{"value":["val1"]}, "key2":{"value":["val2"]}, "user-agent":{"value":["grpc-go/1.78.0"]}}}}
+{"status":"ok", "metadata":{"metadata":{":authority":{"value":["localhost:5000"]}, "content-type":{"value":["application/grpc"]}, "key1":{"value":["val1"]}, "key2":{"value":["val2"]}, "user-agent":{"value":["grpc-go/1.79.1"]}}}}
 
 $ giro empty_json rerost.giro.v1.EchoRequest
 {"message":""}
