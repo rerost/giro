@@ -74,7 +74,9 @@ jobs:
           exit 1
         ) || {
           echo "RPC server did not become ready"
-          echo "--- giro call output/stderr ---"; cat /tmp/giro-call.log
+          echo "--- call_result.txt ---"; cat call_result.txt
+          echo "--- giro call stderr ---"; cat /tmp/giro-call.log
+          echo "--- docker ps -a ---"; docker ps -a
           echo "--- container logs ---"; docker logs "$container_id" 2>&1
           exit 1
         }
