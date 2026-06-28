@@ -59,21 +59,20 @@ jobs:
         /tmp/reflection-server > /tmp/reflection-server.log 2>&1 &
         disown -a
 
-        echo "check ls (retried until RPC + reflection servers are ready)"
+        echo "check ls"
         echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-        time bash -c 'for i in $(seq 1 100); do /tmp/giro ls > ls_result.txt 2>/tmp/giro-ls.log && diff -q ls_result.txt ls_expect.txt >/dev/null 2>&1 && exit 0; sleep 0.05; done; exit 1' || {
-          echo "servers did not become ready"
-          echo "--- giro ls output/stderr ---"; cat /tmp/giro-ls.log
+        time /tmp/giro ls > ls_result.txt
+        time diff ls_result.txt ls_expect.txt
+
+        echo "check call (retried until the RPC server is ready)"
+        echo "{\"message\": \"test\"}" > call_expect.txt
+        time bash -c 'for i in $(seq 1 100); do /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 "{\"message\": \"test\"}" > call_result.txt 2>/tmp/giro-call.log && diff -q call_result.txt call_expect.txt >/dev/null 2>&1 && exit 0; sleep 0.05; done; exit 1' || {
+          echo "RPC server did not become ready"
+          echo "--- giro call output/stderr ---"; cat /tmp/giro-call.log
           echo "--- container logs ---"; docker logs "$container_id" 2>&1
-          echo "--- reflection-server.log ---"; cat /tmp/reflection-server.log
           exit 1
         }
-        diff ls_result.txt ls_expect.txt
-
-        echo "check call"
-        time echo "{\"message\":\"test\"}" > call_expect.txt
-        time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
-        time diff call_result.txt call_expect.txt
+        diff call_result.txt call_expect.txt
 
         echo "check empty call"
         time echo "{}" > empty_call_expect.txt
