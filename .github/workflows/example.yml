@@ -41,9 +41,9 @@ jobs:
         time bash -c 'until [ -f /tmp/giro.done ] && [ -f /tmp/reflection.done ]; do sleep 0.05; done'
 
         echo "docker run"
-        time docker run -d -p 5001:5001 test # RPC Server
+        container_id=$(docker run -d -p 5001:5001 test) # RPC Server
         echo "wait for RPC server"
-        time bash -c 'for i in $(seq 1 100); do /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 "{}" >/dev/null 2>&1 && exit 0; sleep 0.05; done; exit 1'
+        time bash -c 'for i in $(seq 1 100); do /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 "{}" >/dev/null 2>&1 && exit 0; sleep 0.05; done; exit 1' || { echo "RPC server did not become ready, container logs:"; docker logs "$container_id"; exit 1; }
         echo "reflection server"
         time /tmp/reflection-server & # Reflection Server
 
