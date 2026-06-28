@@ -21,19 +21,22 @@ jobs:
       run: docker pull ruby:4.0.5-alpine
     - name: Checkout repository
       uses: actions/checkout@v7
-    - uses: crazy-max/ghaction-github-runtime@3cb05d89e1f492524af3d41a1c98c83bc3025124 # v3
     - name: Wait for Buildx setup
       wait: buildx-setup
     - name: Build
       id: docker-build
       background: true
-      run: |
-        docker buildx build --builder ci-builder \
-          --cache-from type=gha,scope=master \
-          --cache-from "type=gha,scope=${{ github.ref_name }}" \
-          --cache-to "type=gha,mode=min,scope=${{ github.ref_name }}" \
-          --tag test --load \
-          ./example/multiple_package/server
+      uses: docker/build-push-action@v7
+      with:
+        builder: ci-builder
+        context: ./example/multiple_package/server
+        push: false
+        cache-from: |
+          type=gha,scope=master
+          type=gha,scope=${{ github.ref_name }}
+        cache-to: type=gha,mode=min,scope=${{ github.ref_name }}
+        tags: test
+        load: true
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
