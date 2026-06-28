@@ -27,7 +27,7 @@ jobs:
         cache-from: |
           type=gha,scope=master
           type=gha,scope=${{ github.ref_name }}
-        cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
+        cache-to: type=gha,mode=min,scope=${{ github.ref_name }}
         tags: test
         load: true
     - name: Run
