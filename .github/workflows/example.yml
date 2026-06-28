@@ -21,8 +21,8 @@ jobs:
         go-version-file: 'go.mod'
     - name: Pre-build Go binaries
       run: |
-        ( go build -o /tmp/giro ./cmd/giro && touch /tmp/giro.done ) &
-        ( go build -o /tmp/reflection-server ./example/multiple_package && touch /tmp/reflection.done ) &
+        ( go build -o /tmp/giro ./cmd/giro && touch /tmp/giro.done ) > /tmp/build-giro.log 2>&1 &
+        ( go build -o /tmp/reflection-server ./example/multiple_package && touch /tmp/reflection.done ) > /tmp/build-reflection.log 2>&1 &
         disown -a
     - name: Build
       uses: docker/build-push-action@v7
