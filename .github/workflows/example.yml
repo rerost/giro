@@ -69,7 +69,11 @@ jobs:
 
         echo "check call"
         time echo "{\"message\":\"test\"}" > call_expect.txt
-        time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt || {
+          echo "--- docker ps -a ---"; docker ps -a
+          echo "--- container logs ---"; docker logs "$container_id" 2>&1
+          exit 1
+        }
         time diff call_result.txt call_expect.txt
 
         echo "check empty call"
