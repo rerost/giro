@@ -19,6 +19,11 @@ jobs:
       uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
+    - name: Pre-build Go binaries
+      run: |
+        ( go build -o /tmp/giro ./cmd/giro && touch /tmp/giro.done ) &
+        ( go build -o /tmp/reflection-server ./example/multiple_package && touch /tmp/reflection.done ) &
+        disown -a
     - name: Build
       uses: docker/build-push-action@v7
       with:
@@ -32,24 +37,27 @@ jobs:
         load: true
     - name: Run
       run: |
+        echo "wait for pre-built binaries"
+        time bash -c 'until [ -f /tmp/giro.done ] && [ -f /tmp/reflection.done ]; do sleep 0.05; done'
+
         echo "docker run"
         time docker run -d -p 5001:5001 test # RPC Server
         echo "reflection server"
-        time go run example/multiple_package/main.go & # Reflection Server
+        time /tmp/reflection-server & # Reflection Server
 
         echo "check ls"
         time echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-        time go run cmd/giro/main.go ls > ls_result.txt
+        time /tmp/giro ls > ls_result.txt
         time diff ls_result.txt ls_expect.txt
 
         echo "check call"
         time echo "{\"message\":\"test\"}" > call_expect.txt
-        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
         time diff call_result.txt call_expect.txt
-        
+
         echo "check empty call"
         time echo "{}" > empty_call_expect.txt
-        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroEmptyTest '{}' > empty_call_result.txt
+        time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroEmptyTest '{}' > empty_call_result.txt
         time diff empty_call_result.txt empty_call_expect.txt
 
   check_make_protoc:
