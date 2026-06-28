@@ -11,54 +11,67 @@ jobs:
     runs-on: ubuntu-latest
     name: Check Docker Build
     steps:
-    - name: Start Buildx setup
-      id: buildx-setup
-      background: true
-      run: docker buildx create --name ci-builder --driver docker-container --bootstrap --use
-    - name: Pre-pull base image into host daemon
-      id: base-pull
-      background: true
-      run: docker pull ruby:4.0.5-alpine
+    - name: Start Buildx setup (background)
+      run: |
+        ( docker buildx create --name ci-builder --driver docker-container --bootstrap --use && touch /tmp/buildx.done ) > /tmp/buildx-setup.log 2>&1 &
+        disown -a
+    - name: Pre-pull base image into host daemon (background)
+      run: |
+        ( docker pull ruby:4.0.5-alpine ) > /tmp/base-pull.log 2>&1 &
+        disown -a
     - name: Checkout repository
       uses: actions/checkout@v7
     - uses: crazy-max/ghaction-github-runtime@v3
-    - name: Build
-      id: docker-build
-      background: true
-      wait: buildx-setup
+    - name: Start Docker build (background)
       run: |
-        docker buildx build --builder ci-builder \
-          --cache-from type=gha,scope=master \
-          --cache-from "type=gha,scope=${{ github.ref_name }}" \
-          --cache-to "type=gha,mode=min,scope=${{ github.ref_name }}" \
-          --tag test --load \
-          ./example/multiple_package/server
+        ( bash -c '
+            timeout 60 bash -c "until [ -f /tmp/buildx.done ]; do sleep 0.1; done"
+            docker buildx build --builder ci-builder \
+              --cache-from type=gha,scope=master \
+              --cache-from "type=gha,scope=${{ github.ref_name }}" \
+              --cache-to "type=gha,mode=min,scope=${{ github.ref_name }}" \
+              --tag test --load \
+              ./example/multiple_package/server
+          ' && touch /tmp/docker-build.done ) > /tmp/docker-build.log 2>&1 &
+        disown -a
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
-    - name: Pre-build giro CLI
-      id: build-giro
-      background: true
-      run: go build -o /tmp/giro ./cmd/giro
-    - name: Pre-build reflection server binary
-      id: build-reflection
-      background: true
-      run: go build -o /tmp/reflection-server ./example/multiple_package
-    - name: Wait for builds
-      wait: [docker-build, build-giro, build-reflection]
-    - name: Start reflection server
-      id: reflection-server
-      background: true
-      run: /tmp/reflection-server
+    - name: Pre-build Go binaries
+      run: |
+        ( go build -o /tmp/giro ./cmd/giro && touch /tmp/giro.done ) > /tmp/build-giro.log 2>&1 &
+        ( go build -o /tmp/reflection-server ./example/multiple_package && touch /tmp/reflection.done ) > /tmp/build-reflection.log 2>&1 &
+        disown -a
+    - name: Wait for Docker build
+      run: |
+        time timeout 120 bash -c 'until [ -f /tmp/docker-build.done ]; do sleep 0.1; done' || true
+        if [ ! -f /tmp/docker-build.done ]; then
+          echo "--- buildx-setup.log ---"; cat /tmp/buildx-setup.log
+          echo "--- base-pull.log ---"; cat /tmp/base-pull.log
+          echo "--- docker-build.log ---"; cat /tmp/docker-build.log
+          exit 1
+        fi
+        cat /tmp/docker-build.log
     - name: Run
       run: |
+        echo "wait for pre-built binaries"
+        time timeout 60 bash -c 'until [ -f /tmp/giro.done ] && [ -f /tmp/reflection.done ]; do sleep 0.05; done' || {
+          echo "--- build-giro.log ---"; cat /tmp/build-giro.log
+          echo "--- build-reflection.log ---"; cat /tmp/build-reflection.log
+          exit 1
+        }
+
         echo "docker run"
         container_id=$(docker run -d -p 5001:5001 test) # RPC Server
+        echo "reflection server"
+        /tmp/reflection-server > /tmp/reflection-server.log 2>&1 & # Reflection Server
+        disown -a
 
         echo "wait for RPC + reflection servers"
         time bash -c 'for i in $(seq 1 100); do /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 "{}" >/dev/null 2>&1 && exit 0; sleep 0.05; done; exit 1' || {
           echo "servers did not become ready, container logs:"; docker logs "$container_id" 2>&1
+          echo "--- reflection-server.log ---"; cat /tmp/reflection-server.log
           exit 1
         }
 
