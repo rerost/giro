@@ -65,7 +65,7 @@ jobs:
         time diff ls_result.txt ls_expect.txt
 
         echo "check call (retried until the RPC server is ready)"
-        echo "{\"message\": \"test\"}" > call_expect.txt
+        echo "{\"message\":\"test\"}" > call_expect.txt
         time (
           for i in $(seq 1 100); do
             /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt 2>/tmp/giro-call.log && diff -q call_result.txt call_expect.txt >/dev/null 2>&1 && exit 0
