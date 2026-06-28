@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM ruby:4.0.5-slim
 
 # Install minimal build dependencies for native extensions
@@ -11,7 +13,9 @@ RUN apt-get update && apt-get install -y \
 
 # Pre-install common gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --jobs 4 && \
+RUN --mount=type=cache,target=/usr/local/bundle/cache \
+    --mount=type=cache,target=/root/.gem \
+    bundle install --jobs 4 && \
     gem install grpc-tools
 
 # Copy application files
