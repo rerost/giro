@@ -13,7 +13,11 @@ jobs:
     steps:
     - name: Start Buildx setup (background)
       run: |
-        ( docker buildx create --name ci-builder --driver docker-container --bootstrap --use && touch /tmp/buildx.done ) > /tmp/buildx-setup.log 2>&1 &
+        ( sudo mkdir -p /etc/docker && \
+          echo '{"features": {"containerd-snapshotter": true}}' | sudo tee /etc/docker/daemon.json > /dev/null && \
+          sudo systemctl restart docker && \
+          docker buildx create --name ci-builder --driver docker --bootstrap --use && \
+          touch /tmp/buildx.done ) > /tmp/buildx-setup.log 2>&1 &
         disown -a
     - name: Checkout repository
       uses: actions/checkout@v7
