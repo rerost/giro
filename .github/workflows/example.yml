@@ -13,7 +13,12 @@ jobs:
     steps:
     - name: Start Buildx setup (background)
       run: |
-        ( docker buildx create --name ci-builder --driver docker-container --bootstrap --use && touch /tmp/buildx.done ) > /tmp/buildx-setup.log 2>&1 &
+        ( set -x
+          sudo mkdir -p /etc/docker
+          echo '{"features": {"containerd-snapshotter": true}}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker buildx create --name ci-builder --driver docker --bootstrap --use
+          touch /tmp/buildx.done ) > /tmp/buildx-setup.log 2>&1 &
         disown -a
     - name: Checkout repository
       uses: actions/checkout@v7
@@ -42,6 +47,9 @@ jobs:
     - name: Wait for Docker build
       run: |
         time timeout 120 bash -c 'until [ -f /tmp/docker-build.done ]; do sleep 0.1; done' || true
+        echo "--- buildx-setup.log ---"
+        cat /tmp/buildx-setup.log
+        echo "--- docker-build.log ---"
         cat /tmp/docker-build.log
         [ -f /tmp/docker-build.done ]
     - name: Run
