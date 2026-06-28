@@ -77,6 +77,9 @@ jobs:
         time echo "{}" > empty_call_expect.txt
         time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroEmptyTest '{}' > empty_call_result.txt
         time diff empty_call_result.txt empty_call_expect.txt
+    - name: Stop reflection server
+      if: always()
+      cancel: reflection-server
 
   check_make_protoc:
     runs-on: ubuntu-latest
