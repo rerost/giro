@@ -17,6 +17,19 @@ jobs:
         disown -a
     - name: Checkout repository
       uses: actions/checkout@v7
+    - uses: crazy-max/ghaction-github-runtime@v3
+    - name: Start Docker build (background)
+      run: |
+        ( bash -c '
+            until [ -f /tmp/buildx.done ]; do sleep 0.1; done
+            docker buildx build --builder ci-builder \
+              --cache-from type=gha,scope=master \
+              --cache-from "type=gha,scope=${{ github.ref_name }}" \
+              --cache-to "type=gha,mode=min,scope=${{ github.ref_name }}" \
+              --tag test --load \
+              ./example/multiple_package/server
+          ' && touch /tmp/docker-build.done ) > /tmp/docker-build.log 2>&1 &
+        disown -a
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
@@ -26,21 +39,11 @@ jobs:
         ( go build -o /tmp/giro ./cmd/giro && touch /tmp/giro.done ) > /tmp/build-giro.log 2>&1 &
         ( go build -o /tmp/reflection-server ./example/multiple_package && touch /tmp/reflection.done ) > /tmp/build-reflection.log 2>&1 &
         disown -a
-    - name: Wait for Buildx setup
+    - name: Wait for Docker build
       run: |
-        time bash -c 'until [ -f /tmp/buildx.done ]; do sleep 0.1; done' || { cat /tmp/buildx-setup.log; exit 1; }
-    - name: Build
-      uses: docker/build-push-action@v7
-      with:
-        builder: ci-builder
-        context: ./example/multiple_package/server
-        push: false
-        cache-from: |
-          type=gha,scope=master
-          type=gha,scope=${{ github.ref_name }}
-        cache-to: type=gha,mode=min,scope=${{ github.ref_name }}
-        tags: test
-        load: true
+        time bash -c 'until [ -f /tmp/docker-build.done ]; do sleep 0.1; done' || true
+        cat /tmp/docker-build.log
+        [ -f /tmp/docker-build.done ]
     - name: Run
       run: |
         echo "wait for pre-built binaries"
