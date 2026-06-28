@@ -66,7 +66,13 @@ jobs:
 
         echo "check call (retried until the RPC server is ready)"
         echo "{\"message\": \"test\"}" > call_expect.txt
-        time bash -c 'for i in $(seq 1 100); do /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 "{\"message\": \"test\"}" > call_result.txt 2>/tmp/giro-call.log && diff -q call_result.txt call_expect.txt >/dev/null 2>&1 && exit 0; sleep 0.05; done; exit 1' || {
+        time (
+          for i in $(seq 1 100); do
+            /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt 2>/tmp/giro-call.log && diff -q call_result.txt call_expect.txt >/dev/null 2>&1 && exit 0
+            sleep 0.05
+          done
+          exit 1
+        ) || {
           echo "RPC server did not become ready"
           echo "--- giro call output/stderr ---"; cat /tmp/giro-call.log
           echo "--- container logs ---"; docker logs "$container_id" 2>&1
