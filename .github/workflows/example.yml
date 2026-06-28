@@ -42,6 +42,8 @@ jobs:
 
         echo "docker run"
         time docker run -d -p 5001:5001 test # RPC Server
+        echo "wait for RPC server"
+        time bash -c 'until (exec 3<>/dev/tcp/localhost/5001) 2>/dev/null; do sleep 0.05; done'
         echo "reflection server"
         time /tmp/reflection-server & # Reflection Server
 
