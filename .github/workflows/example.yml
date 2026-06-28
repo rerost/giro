@@ -86,19 +86,43 @@ jobs:
     name: Check `make protoc`
     steps:
     - name: Install Protoc
+      id: install-protoc
+      background: true
       uses: arduino/setup-protoc@v3
       with:
         version: "29.x"
     - name: Checkout repository
       uses: actions/checkout@v7
     - name: Set up Go
+      id: setup-go
+      background: true
       uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
-    - uses: ruby/setup-ruby@v1
+    - name: Set up Ruby
+      id: setup-ruby
+      background: true
+      uses: ruby/setup-ruby@v1
       with:
         working-directory: example/multiple_package/
+    - name: Wait for Go setup
+      wait: setup-go
+    - name: Pre-install Go protoc plugins
+      id: install-go-plugins
+      background: true
+      run: |
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26.0 &
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1 &
+        go install ./cmd/protoc-gen-reflection-server &
+        go install ./cmd/giro &
+        wait
+    - name: Wait for Ruby setup
+      wait: setup-ruby
     - name: Install grpc_tools_ruby_protoc
+      id: install-grpc-tools
+      background: true
       run: gem install grpc-tools
+    - name: Wait for tool installs
+      wait: [install-protoc, install-go-plugins, install-grpc-tools]
     - name: Check
       run: cd example/multiple_package/ &&  make protoc && git diff --exit-code
