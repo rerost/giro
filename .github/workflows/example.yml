@@ -11,8 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Check Docker Build
     steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v4
+    - name: Start Buildx setup (background)
+      run: |
+        ( docker buildx create --name ci-builder --driver docker-container --bootstrap --use && touch /tmp/buildx.done ) > /tmp/buildx-setup.log 2>&1 &
+        disown -a
     - name: Checkout repository
       uses: actions/checkout@v7
     - name: Set up Go
@@ -24,9 +26,13 @@ jobs:
         ( go build -o /tmp/giro ./cmd/giro && touch /tmp/giro.done ) > /tmp/build-giro.log 2>&1 &
         ( go build -o /tmp/reflection-server ./example/multiple_package && touch /tmp/reflection.done ) > /tmp/build-reflection.log 2>&1 &
         disown -a
+    - name: Wait for Buildx setup
+      run: |
+        time bash -c 'until [ -f /tmp/buildx.done ]; do sleep 0.1; done' || { cat /tmp/buildx-setup.log; exit 1; }
     - name: Build
       uses: docker/build-push-action@v7
       with:
+        builder: ci-builder
         context: ./example/multiple_package/server
         push: false
         cache-from: |
