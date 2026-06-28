@@ -11,45 +11,74 @@ jobs:
     runs-on: ubuntu-latest
     name: Check Docker Build
     steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v4
+    - name: Start Buildx setup
+      id: buildx-setup
+      background: true
+      run: docker buildx create --name ci-builder --driver docker-container --bootstrap --use
+    - name: Pre-pull base image into host daemon
+      id: base-pull
+      background: true
+      run: docker pull ruby:4.0.5-alpine
     - name: Checkout repository
       uses: actions/checkout@v7
-    - name: Set up Go
-      uses: actions/setup-go@v6
-      with:
-        go-version-file: 'go.mod'
+    - name: Wait for Buildx setup
+      wait: buildx-setup
     - name: Build
+      id: docker-build
+      background: true
       uses: docker/build-push-action@v7
       with:
+        builder: ci-builder
         context: ./example/multiple_package/server
         push: false
         cache-from: |
           type=gha,scope=master
           type=gha,scope=${{ github.ref_name }}
-        cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
+        cache-to: type=gha,mode=min,scope=${{ github.ref_name }}
         tags: test
         load: true
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
+    - name: Pre-build giro CLI
+      id: build-giro
+      background: true
+      run: go build -o /tmp/giro ./cmd/giro
+    - name: Pre-build reflection server binary
+      id: build-reflection
+      background: true
+      run: go build -o /tmp/reflection-server ./example/multiple_package
+    - name: Wait for builds
+      wait: [docker-build, build-giro, build-reflection]
     - name: Run
       run: |
         echo "docker run"
-        time docker run -d -p 5001:5001 test # RPC Server
+        container_id=$(docker run -d -p 5001:5001 test) # RPC Server
         echo "reflection server"
-        time go run example/multiple_package/main.go & # Reflection Server
+        /tmp/reflection-server > /tmp/reflection-server.log 2>&1 &
+        disown -a
 
         echo "check ls"
-        time echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
-        time go run cmd/giro/main.go ls > ls_result.txt
+        echo -e "example.multiple_package.protos.one.GiroService\nexample.multiple_package.protos.two.BqvService\ngrpc.health.v1.Health\ngrpc.reflection.v1.ServerReflection\ngrpc.reflection.v1alpha.ServerReflection\nrerost.giro.v1.HostService" > ls_expect.txt
+        time /tmp/giro ls > ls_result.txt
         time diff ls_result.txt ls_expect.txt
+
+        echo "wait for RPC server to be ready"
+        sleep 2
 
         echo "check call"
         time echo "{\"message\":\"test\"}" > call_expect.txt
-        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt
+        time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 '{"message": "test"}' > call_result.txt || {
+          echo "--- docker ps -a ---"; docker ps -a
+          echo "--- container logs ---"; docker logs "$container_id" 2>&1
+          exit 1
+        }
         time diff call_result.txt call_expect.txt
-        
+
         echo "check empty call"
         time echo "{}" > empty_call_expect.txt
-        time go run cmd/giro/main.go call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroEmptyTest '{}' > empty_call_result.txt
+        time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroEmptyTest '{}' > empty_call_result.txt
         time diff empty_call_result.txt empty_call_expect.txt
 
   check_make_protoc:
@@ -57,19 +86,43 @@ jobs:
     name: Check `make protoc`
     steps:
     - name: Install Protoc
+      id: install-protoc
+      background: true
       uses: arduino/setup-protoc@v3
       with:
         version: "29.x"
     - name: Checkout repository
       uses: actions/checkout@v7
     - name: Set up Go
+      id: setup-go
+      background: true
       uses: actions/setup-go@v6
       with:
         go-version-file: 'go.mod'
-    - uses: ruby/setup-ruby@v1
+    - name: Set up Ruby
+      id: setup-ruby
+      background: true
+      uses: ruby/setup-ruby@v1
       with:
         working-directory: example/multiple_package/
+    - name: Wait for Go setup
+      wait: setup-go
+    - name: Pre-install Go protoc plugins
+      id: install-go-plugins
+      background: true
+      run: |
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26.0 &
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1 &
+        go install ./cmd/protoc-gen-reflection-server &
+        go install ./cmd/giro &
+        wait
+    - name: Wait for Ruby setup
+      wait: setup-ruby
     - name: Install grpc_tools_ruby_protoc
+      id: install-grpc-tools
+      background: true
       run: gem install grpc-tools
+    - name: Wait for tool installs
+      wait: [install-protoc, install-go-plugins, install-grpc-tools]
     - name: Check
       run: cd example/multiple_package/ &&  make protoc && git diff --exit-code

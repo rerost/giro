@@ -1,18 +1,19 @@
-FROM ruby:4.0.5-slim
+# syntax=docker/dockerfile:1
+
+FROM ruby:4.0.5-alpine AS builder
 
 # Install minimal build dependencies for native extensions
-RUN apt-get update && apt-get install -y \
-    g++ \
-    make \
-    protobuf-compiler \
-    libprotobuf-dev \
-    && rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
+RUN apk add --no-cache g++ make
 
-# Pre-install common gems
+# Pre-install gems needed to run the server (grpc-tools is a protoc
+# plugin used only by `make protoc`, not at server runtime)
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --jobs 4 && \
-    gem install grpc-tools
+RUN --mount=type=cache,target=/usr/local/bundle/cache \
+    bundle install --jobs 4
+
+FROM ruby:4.0.5-alpine
+
+COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Copy application files
 COPY . .
