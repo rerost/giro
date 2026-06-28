@@ -48,13 +48,14 @@ jobs:
       run: go build -o /tmp/reflection-server ./example/multiple_package
     - name: Wait for builds
       wait: [docker-build, build-giro, build-reflection]
+    - name: Start reflection server
+      id: reflection-server
+      background: true
+      run: /tmp/reflection-server
     - name: Run
       run: |
         echo "docker run"
         container_id=$(docker run -d -p 5001:5001 test) # RPC Server
-        echo "reflection server"
-        /tmp/reflection-server > /tmp/reflection-server.log 2>&1 & # long-running, no native "cancel:" support here yet
-        disown -a
 
         echo "wait for RPC + reflection servers"
         time bash -c 'for i in $(seq 1 100); do /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroTest1 "{}" >/dev/null 2>&1 && exit 0; sleep 0.05; done; exit 1' || {
@@ -76,6 +77,8 @@ jobs:
         time echo "{}" > empty_call_expect.txt
         time /tmp/giro call --rpc-server=localhost:5001 example.multiple_package.protos.one.GiroService/GiroEmptyTest '{}' > empty_call_result.txt
         time diff empty_call_result.txt empty_call_expect.txt
+    - name: Stop reflection server
+      cancel: reflection-server
 
   check_make_protoc:
     runs-on: ubuntu-latest
