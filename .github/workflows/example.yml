@@ -21,7 +21,7 @@ jobs:
     - name: Start Docker build (background)
       run: |
         ( bash -c '
-            until [ -f /tmp/buildx.done ]; do sleep 0.1; done
+            timeout 60 bash -c "until [ -f /tmp/buildx.done ]; do sleep 0.1; done"
             docker buildx build --builder ci-builder \
               --cache-from type=gha,scope=master \
               --cache-from "type=gha,scope=${{ github.ref_name }}" \
@@ -41,13 +41,13 @@ jobs:
         disown -a
     - name: Wait for Docker build
       run: |
-        time bash -c 'until [ -f /tmp/docker-build.done ]; do sleep 0.1; done' || true
+        time timeout 120 bash -c 'until [ -f /tmp/docker-build.done ]; do sleep 0.1; done' || true
         cat /tmp/docker-build.log
         [ -f /tmp/docker-build.done ]
     - name: Run
       run: |
         echo "wait for pre-built binaries"
-        time bash -c 'until [ -f /tmp/giro.done ] && [ -f /tmp/reflection.done ]; do sleep 0.05; done'
+        time timeout 60 bash -c 'until [ -f /tmp/giro.done ] && [ -f /tmp/reflection.done ]; do sleep 0.05; done'
 
         echo "docker run"
         container_id=$(docker run -d -p 5001:5001 test) # RPC Server
