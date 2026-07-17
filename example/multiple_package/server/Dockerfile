@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ruby:4.0.5-alpine AS builder
+FROM ruby:4.0.6-alpine AS builder
 
 # Install minimal build dependencies for native extensions
 RUN apk add --no-cache g++ make
@@ -11,7 +11,7 @@ COPY Gemfile Gemfile.lock ./
 RUN --mount=type=cache,target=/usr/local/bundle/cache \
     bundle install --jobs 4
 
-FROM ruby:4.0.5-alpine
+FROM ruby:4.0.6-alpine
 
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 
