@@ -38,7 +38,7 @@ jobs:
         tags: test
         load: true
     - name: Set up Go
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@v7
       with:
         go-version-file: 'go.mod'
     - name: Pre-build giro CLI
@@ -96,7 +96,7 @@ jobs:
     - name: Set up Go
       id: setup-go
       background: true
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@v7
       with:
         go-version-file: 'go.mod'
     - name: Set up Ruby
