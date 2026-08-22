@@ -2,7 +2,7 @@ module github.com/rerost/giro
 
 go 1.25.0
 
-toolchain go1.26.6
+toolchain go1.27.0
 
 require (
 	github.com/bradleyjkemp/cupaloy/v2 v2.8.0
