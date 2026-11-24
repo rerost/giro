@@ -39,15 +39,15 @@ Usage:
   giro call <method> [message_body] [flags]
 
 Flags:
-  -t, --call-timeout int   call timeout seconds
-  -h, --help               help for call
-  -m, --metadata string    metadata. e.g key1:val1:key2:val2
+  -t, --call-timeout int    call timeout seconds
+  -h, --help[=true|false]   help for call
+  -m, --metadata string     metadata. e.g key1:val1:key2:val2
 
 Global Flags:
-      --debug                      
+      --debug[=true|false]         
   -r, --reflection-server string    (default "localhost:5000")
       --rpc-server string          
-      --verbose
+      --verbose[=true|false]
 
 Method notfound, serviceName: rerost.giro.v1.TypoService, methodName: Echo
 
@@ -58,14 +58,14 @@ Usage:
   giro call <method> [message_body] [flags]
 
 Flags:
-  -t, --call-timeout int   call timeout seconds
-  -h, --help               help for call
-  -m, --metadata string    metadata. e.g key1:val1:key2:val2
+  -t, --call-timeout int    call timeout seconds
+  -h, --help[=true|false]   help for call
+  -m, --metadata string     metadata. e.g key1:val1:key2:val2
 
 Global Flags:
-      --debug                      
+      --debug[=true|false]         
   -r, --reflection-server string    (default "localhost:5000")
       --rpc-server string          
-      --verbose
+      --verbose[=true|false]
 
 Method not Found
